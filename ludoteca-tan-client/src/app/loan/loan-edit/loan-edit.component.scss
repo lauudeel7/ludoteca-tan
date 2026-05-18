@@ -1,0 +1,30 @@
+.container {
+  min-width: 400px;
+  max-width: 550px;
+  padding: 24px;
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+    margin-bottom: 24px;
+  }
+
+  .buttons {
+    text-align: right;
+    button {
+      margin-left: 12px;
+    }
+  }
+}
+
+.alert-error-msg {
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 500;
+  background-color: #fef2f2;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+}

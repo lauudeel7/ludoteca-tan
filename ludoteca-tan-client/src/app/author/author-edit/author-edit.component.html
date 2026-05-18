@@ -1,0 +1,30 @@
+<div class="container">
+    <h1>{{ id() ? 'Modificar autor' : 'Crear autor' }}</h1>
+
+    <form #authorForm="ngForm">
+        <mat-form-field appearance="outline">
+            <mat-label>Identificador</mat-label>
+            <input type="text" matInput placeholder="Identificador" [value]="id() ?? ''" name="id" disabled>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Nombre *</mat-label>
+            <input type="text" matInput placeholder="Nombre del autor" [(ngModel)]="name" name="name" required (input)="errorMessage.set('')">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Nacionalidad *</mat-label>
+            <input type="text" matInput placeholder="Nacionalidad del autor" [(ngModel)]="nationality" name="nationality" required (input)="errorMessage.set('')">
+        </mat-form-field>
+
+        @if (errorMessage()) {
+            <div class="alert-error-msg">{{ errorMessage() }}</div>
+        }
+    </form>
+
+    <div class="buttons">
+        <button mat-stroked-button (click)="onClose()">Cerrar</button>
+        <button mat-flat-button color="primary" (click)="onSave()">Guardar</button>
+    </div>
+</div>
+

@@ -1,0 +1,59 @@
+<div class="backdrop" (click)="cancel()">
+
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2>{{ game.id ? 'Editar juego' : 'Crear juego' }}</h2>
+    </div>
+
+    <div class="modal-body">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>ID</mat-label>
+        <input matInput type="text" [value]="game.id ?? ''" placeholder="Identificador" readonly />
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Título</mat-label>
+        <input matInput type="text" [(ngModel)]="game.title" required />
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Edad</mat-label>
+        <input matInput type="number" [(ngModel)]="game.age" min="0" max="99" required />
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Categoría</mat-label>
+        <mat-select [(ngModel)]="game.category" [compareWith]="compareObjects" required>
+          <mat-option [value]="undefined">Seleccione categoría</mat-option>
+          <mat-option *ngFor="let c of categories" [value]="c">
+            {{ c.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Autor</mat-label>
+        <mat-select [(ngModel)]="game.author" [compareWith]="compareObjects" required>
+          <mat-option [value]="undefined">Seleccione autor</mat-option>
+          <mat-option *ngFor="let a of authors" [value]="a">
+            {{ a.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="modal-footer">
+      <button mat-button (click)="cancel()">
+        Cancelar
+      </button>
+      <button mat-raised-button color="primary" (click)="save()" [disabled]="!isValid()">
+        Guardar
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+

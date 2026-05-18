@@ -1,0 +1,106 @@
+.container {
+  max-width: 1140px;
+  margin: 50px auto;
+  padding: 0 24px;
+
+  .header-section {
+    margin-bottom: 32px;
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+    .title-underline {
+      height: 4px;
+      width: 60px;
+      background: linear-gradient(90deg, #1976d2, #64b5f6);
+      border-radius: 2px;
+      margin-top: 8px;
+    }
+  }
+}
+
+.toolbar-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.05);
+
+  mat-form-field {
+    flex: 1;
+    margin-bottom: -22px;
+  }
+
+  .actions-group {
+    display: flex;
+    gap: 12px;
+    
+    button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+  }
+}
+
+mat-table {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px 12px 0 0;
+  overflow: hidden;
+
+  .mat-header-row {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #cbd5e1;
+    min-height: 56px;
+    .mat-header-cell {
+      text-transform: uppercase;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+    }
+  }
+
+  .mat-row {
+    min-height: 60px;
+    border-bottom: 1px solid #f1f5f9;
+    &:hover { background-color: #f8fafc; }
+  }
+
+  .mat-cell { font-size: 14px; color: #334155; }
+  
+  .mat-column-id { flex: 0 0 10%; justify-content: center; font-family: monospace; }
+  .mat-column-game { flex: 0 0 25%; }
+  .mat-column-client { flex: 0 0 25%; }
+  .mat-column-startDate { flex: 0 0 15%; }
+  .mat-column-endDate { flex: 0 0 15%; }
+  .mat-column-action { flex: 0 0 10%; justify-content: center; gap: 8px; }
+}
+
+mat-paginator {
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  background: #f8fafc;
+  margin-bottom: 28px;
+}
+
+.buttons-bottom {
+  text-align: right;
+}
+
+.btn-filter-primary {
+  background-color: #1976d2 !important;
+  color: white !important;
+  &:hover { background-color: #1565c0 !important; }
+}
+
+.btn-edit { color: #2563eb !important; }
+.btn-delete { color: #dc2626 !important; }

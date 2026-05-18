@@ -1,0 +1,30 @@
+.container {
+    min-width: 350px;
+    max-width: 500px;
+    padding: 20px;
+
+    form {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 20px;
+    }
+
+    .buttons {
+        text-align: right;
+
+        button {
+            margin-left: 10px;
+        }
+    }
+
+    .alert-error-msg {
+        color: #dc2626;
+        font-size: 13px;
+        font-weight: 500;
+        background-color: #fef2f2;
+        padding: 10px 14px;
+        border-radius: 6px;
+        border: 1px solid #fecaca;
+    }
+
+}

@@ -1,0 +1,49 @@
+<div class="container">
+  <div class="header-section">
+    <h1>Catálogo de Juegos</h1>
+    <div class="title-underline"></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Nombre del juego</mat-label>
+        <input matInput type="text" [(ngModel)]="title" placeholder="Ej. Carcassonne" />
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Categoría</mat-label>
+        <mat-select [(ngModel)]="categoryId">
+          <mat-option [value]="undefined">Todas las categorías</mat-option>
+          <mat-option *ngFor="let category of categories" [value]="category.id">
+            {{ category.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-flat-button color="primary" (click)="search()">Filtrar</button>
+        <button mat-stroked-button (click)="cleanFilters()">Limpiar</button>
+      </div>
+    </div>
+
+    <button mat-raised-button color="primary" (click)="createGame()">
+      + Nuevo juego
+    </button>
+  </div>
+
+  <div class="game-container">
+    <app-game-item
+      *ngFor="let gameItem of games"
+      [game]="gameItem"
+      (cardClick)="editGame(gameItem)">
+    </app-game-item>
+  </div>
+</div>
+
+<app-game-edit
+  *ngIf="showModal"
+  [game]="selectedGame!"
+  (close)="closeModal()">
+</app-game-edit>
+
