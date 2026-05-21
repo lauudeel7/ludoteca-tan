@@ -23,9 +23,15 @@ public class AuthorController {
         return authorService.save(dto);
     }
 
-    @PutMapping
-    public AuthorDTO update(@RequestBody AuthorDTO dto) {
-        return authorService.update(dto.getId(), dto);
+    @PutMapping(value = { "", "/{id}" })
+    public AuthorDTO update(@PathVariable(required = false) Long id, @RequestBody AuthorDTO dto) {
+        Long targetId = (id != null) ? id : dto.getId();
+
+        if (targetId == null) {
+            return authorService.save(dto);
+        }
+
+        return authorService.update(targetId, dto);
     }
 
     @DeleteMapping("/{id}")

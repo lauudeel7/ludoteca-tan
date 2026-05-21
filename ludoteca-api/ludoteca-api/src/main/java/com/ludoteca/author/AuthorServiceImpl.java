@@ -24,6 +24,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     public AuthorDTO save(AuthorDTO dto) {
+        if (authorRepository.existsByName(dto.getName())) {
+            throw new BadRequestException("Ya existe un autor registrado con ese nombre.");
+        }
         Author author = new Author();
         author.setName(dto.getName());
         author.setNationality(dto.getNationality());
@@ -34,6 +37,10 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     public AuthorDTO update(Long id, AuthorDTO dto) {
         Author author = authorRepository.findById(id).orElseThrow();
+
+        if (!author.getName().equalsIgnoreCase(dto.getName()) && authorRepository.existsByName(dto.getName())) {
+            throw new BadRequestException("Ya existe un autor registrado con ese nombre.");
+        }
 
         author.setName(dto.getName());
         author.setNationality(dto.getNationality());

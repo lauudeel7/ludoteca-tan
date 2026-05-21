@@ -1,6 +1,7 @@
 package com.ludoteca.author.model;
 
 public class AuthorDTO {
+
     private Long id;
 
     private String name;
