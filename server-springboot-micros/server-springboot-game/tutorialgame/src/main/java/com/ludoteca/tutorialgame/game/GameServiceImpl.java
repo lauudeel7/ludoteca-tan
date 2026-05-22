@@ -26,7 +26,7 @@ public class GameServiceImpl implements GameService {
 
         GameSpecification titleSpec = new GameSpecification(new SearchCriteria("title", ":", title));
         GameSpecification categorySpec = new GameSpecification(new SearchCriteria("idCategory", ":", idCategory));
-        
+
         Specification<Game> spec = titleSpec.and(categorySpec);
 
         return this.gameRepository.findAll(spec);
@@ -48,8 +48,8 @@ public class GameServiceImpl implements GameService {
 
         BeanUtils.copyProperties(dto, game, "id");
 
-        game.setIdAuthor(dto.getIdAuthor());
-        game.setIdCategory(dto.getIdCategory());
+        game.setIdAuthor(dto.getAuthor().getId());
+        game.setIdCategory(dto.getCategory().getId());
 
         this.gameRepository.save(game);
     }
