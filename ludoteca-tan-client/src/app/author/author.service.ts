@@ -12,17 +12,27 @@ import { HttpClient } from '@angular/common/http';
 export class AuthorService {
   constructor(private http: HttpClient) {}
 
-  private baseUrl = 'http://localhost:8080/authors';
+  private baseUrl = 'http://localhost:8080/author';
 
-  getAuthors(pageable: Pageable): Observable<PaginatedData<Author>> {
-    const url = `${this.baseUrl}?page=${pageable.pageNumber}&size=${pageable.pageSize}`;
-    return this.http.get<PaginatedData<Author>>(url);
+    getAuthors(pageable: Pageable): Observable<PaginatedData<Author>> {
+    const searchDto = {
+      pageable: {
+        pageNumber: pageable.pageNumber,
+        pageSize: pageable.pageSize
+      }
+    };
+    return this.http.post<PaginatedData<Author>>(this.baseUrl, searchDto);
   }
 
   getAllAuthors(): Observable<Author[]> {
-    const url = `${this.baseUrl}?page=0&size=1000`;
+    const searchDto = {
+      pageable: {
+        pageNumber: 0,
+        pageSize: 1000
+      }
+    };
     
-    return this.http.get<PaginatedData<Author>>(url).pipe(
+    return this.http.post<PaginatedData<Author>>(this.baseUrl, searchDto).pipe(
       map(response => response.content ?? [])
     );
   }

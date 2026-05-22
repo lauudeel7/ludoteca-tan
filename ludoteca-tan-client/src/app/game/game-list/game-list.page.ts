@@ -8,7 +8,8 @@ import { FormsModule } from '@angular/forms';
 import { Category } from '../../category/models/category.model';
 import { CategoryService } from '../../category/category.service';
 import { GameItemComponent } from './game-item/game-item'; 
-
+import { Author } from '../../author/models/author.model';
+import { AuthorService } from '../../author/author.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -36,6 +37,7 @@ export class GameListPage implements OnInit {
 
   games: Game[] = [];
   categories: Category[] = [];
+  authors: Author[] = [];
   title: string = "";
   categoryId?: number;
   selectedGame: Game | null = null;
@@ -44,22 +46,25 @@ export class GameListPage implements OnInit {
   constructor(
     private gameService: GameService,
     private categoryService: CategoryService,
+    private authorService: AuthorService,
     private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
-    this.loadGames();
     this.loadCategories();
+    this.loadAuthors();
+    this.loadGames();
+    
   }
 
-  loadGames(): void {
+    loadGames(): void {
     this.gameService.getGames(
       this.title ? this.title : undefined,
       this.categoryId ?? undefined
     ).subscribe(
       games => {
         this.games = games;
-        this.cdr.detectChanges();
+        this.mapGamesWithReferences(); 
       }
     );
   }
@@ -68,9 +73,50 @@ export class GameListPage implements OnInit {
     this.categoryService.getCategories().subscribe(
       categories => {
         this.categories = categories;
+        this.mapGamesWithReferences(); 
       }
     );
   }
+
+  loadAuthors(): void {
+    this.authorService.getAllAuthors().subscribe(
+      authors => {
+        this.authors = authors;
+        this.mapGamesWithReferences();
+      }
+    );
+  }
+
+
+      mapGamesWithReferences(): void {
+    if (!this.games || this.games.length === 0) return;
+
+    this.games = this.games.map(game => {
+      const catId = (game as any).idCategory || 
+                    (game as any).categoryId || 
+                    game.category?.id;
+
+      const autId = (game as any).idAuthor || 
+                    (game as any).authorId || 
+                    game.author?.id;
+
+      const matchingCategory = this.categories.find(c => c.id === catId);
+      const matchingAuthor = this.authors.find(a => a.id === autId);
+
+      return {
+        ...game,
+        categoryName: matchingCategory ? matchingCategory.name : (game.category?.name || 'Sin categoría'),
+        authorName: matchingAuthor ? matchingAuthor.name : (game.author?.name || 'Sin autor'),
+        authorNationality: matchingAuthor ? matchingAuthor.nationality : (game.author?.nationality || 'Desconocida')
+      };
+    });
+
+    this.cdr.detectChanges();
+  }
+
+
+
+
 
   search(): void {
     this.loadGames();

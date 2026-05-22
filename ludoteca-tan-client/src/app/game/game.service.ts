@@ -7,33 +7,28 @@ import { Game } from './models/game.model';
     providedIn: 'root',
 })
 export class GameService {
-    urlEndPoint = 'http://localhost:8080/games';
+    urlEndPoint = 'http://localhost:8080/game';
 
     constructor(private httpClient: HttpClient) { }
 
-    getGames(
-        title?:string,
-        categoryId?:number
+        getGames(
+        title?: string,
+        categoryId?: number
     ): Observable<Game[]> {
 
         let params = new HttpParams();
 
-        if (title){
-          params = params.set(
-            'title',
-            title
-        );
+        if (title) {
+            params = params.set('title', title);
         }
 
-        if (categoryId!== undefined){
-          params = params.set(
-            'categoryId',
-            categoryId
-        );
+        if (categoryId !== undefined) {
+            params = params.set('idCategory', categoryId);
         }
 
-        return this.httpClient.get<Game[]>(this.urlEndPoint,{params});
+        return this.httpClient.get<Game[]>(this.urlEndPoint, { params });
     }
+
 
     getGame(idGame: number): Observable<Game> {
       return this.httpClient.get<Game>(this.urlEndPoint+'/'+idGame);
