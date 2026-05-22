@@ -22,4 +22,9 @@ public interface GameService {
      * @param dto datos de la entidad
      */
     void save(Long id, GameDto dto);
+
+    boolean isCategoryInUse(Long idCategory);
+
+    boolean isAuthorInUse(Long idAuthor);
+
 }

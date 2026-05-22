@@ -62,6 +62,13 @@ public class CategoryServiceImpl implements CategoryService {
             throw new Exception("Not exists");
         }
 
+        String url = "http://localhost:8080/game/exists-category/" + id;
+        Boolean hasGames = new org.springframework.web.client.RestTemplate().getForObject(url, Boolean.class);
+
+        if (Boolean.TRUE.equals(hasGames)) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.BAD_REQUEST);
+        }
+
         this.categoryRepository.deleteById(id);
     }
 

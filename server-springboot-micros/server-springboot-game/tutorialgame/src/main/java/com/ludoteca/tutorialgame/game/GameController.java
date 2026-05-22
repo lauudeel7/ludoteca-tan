@@ -69,4 +69,13 @@ public class GameController {
         gameService.save(id, dto);
     }
 
+    @GetMapping("/exists-category/{id}")
+    public boolean existsCategory(@PathVariable("id") Long id) {
+        return this.gameService.isCategoryInUse(id);
+    }
+
+    @GetMapping("/exists-author/{id}")
+    public boolean existsAuthor(@PathVariable("id") Long id) {
+        return this.gameService.isAuthorInUse(id);
+    }
 }

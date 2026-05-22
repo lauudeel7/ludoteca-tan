@@ -54,4 +54,14 @@ public class GameServiceImpl implements GameService {
         this.gameRepository.save(game);
     }
 
+    @Override
+    public boolean isCategoryInUse(Long idCategory) {
+        return this.gameRepository.existsByIdCategory(idCategory);
+    }
+
+    @Override
+    public boolean isAuthorInUse(Long idAuthor) {
+        return this.gameRepository.existsByIdAuthor(idAuthor);
+    }
+
 }
