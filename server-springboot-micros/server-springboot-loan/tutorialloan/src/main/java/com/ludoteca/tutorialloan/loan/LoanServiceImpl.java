@@ -77,12 +77,12 @@ public class LoanServiceImpl implements LoanService {
 
         List<Loan> gameOverlap = this.loanRepository.findOverlappingGameLoans(targetId, dto.getGame().getId(), dto.getLoanDate(), dto.getReturnDate());
         if (!gameOverlap.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ERR_GAME_ALREADY_LOANED");
         }
 
         List<Loan> clientOverlap = this.loanRepository.findOverlappingClientLoans(targetId, dto.getClient().getId(), dto.getLoanDate(), dto.getReturnDate());
         if (clientOverlap.size() >= 2) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ERR_CLIENT_MAX_LOANS");
         }
 
         Loan loan = (id == null) ? new Loan() : this.loanRepository.findById(id).orElseThrow(() -> new Exception("Not exists"));

@@ -10,10 +10,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface LoanRepository extends CrudRepository<Loan, Long>, JpaSpecificationExecutor<Loan> {
-    @Query("SELECT l FROM Loan l WHERE l.gameId = :gameId AND l.id <> :id AND NOT (l.returnDate < :loanDate OR l.loanDate > :returnDate)")
+    @Query("SELECT l FROM Loan l WHERE l.gameId = :gameId AND l.id <> :id AND l.loanDate <= :returnDate AND l.returnDate >= :loanDate")
     List<Loan> findOverlappingGameLoans(@Param("id") Long id, @Param("gameId") Long gameId, @Param("loanDate") LocalDate loanDate, @Param("returnDate") LocalDate returnDate);
 
-    @Query("SELECT l FROM Loan l WHERE l.clientId = :clientId AND l.id <> :id AND NOT (l.returnDate < :loanDate OR l.loanDate > :returnDate)")
+    @Query("SELECT l FROM Loan l WHERE l.clientId = :clientId AND l.id <> :id AND l.loanDate <= :returnDate AND l.returnDate >= :loanDate")
     List<Loan> findOverlappingClientLoans(@Param("id") Long id, @Param("clientId") Long clientId, @Param("loanDate") LocalDate loanDate, @Param("returnDate") LocalDate returnDate);
 
     boolean existsByClientId(Long clientId);
