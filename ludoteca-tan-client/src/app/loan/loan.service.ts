@@ -10,18 +10,36 @@ import { Loan } from './models/loan.model';
 })
 export class LoanService {
   private readonly http = inject(HttpClient);
-  private readonly urlEndPoint = 'http://localhost:8080/loans';
+  private readonly urlEndPoint = 'http://localhost:8080/loan';
 
   getLoans(pageable: Pageable, gameId?: number, clientId?: number, date?: string): Observable<PaginatedData<Loan>> {
-    let paramsUrl = `${this.urlEndPoint}?page=${pageable.pageNumber}&size=${pageable.pageSize}`;
-    if (gameId) paramsUrl += `&gameId=${gameId}`;
-    if (clientId) paramsUrl += `&clientId=${clientId}`;
-    if (date) paramsUrl += `&date=${date}`;
-    return this.http.get<PaginatedData<Loan>>(paramsUrl);
+    const searchDto = {
+      gameId: gameId || null,
+      clientId: clientId || null,
+      date: date || null,
+      pageable: {
+        pageNumber: pageable.pageNumber,
+        pageSize: pageable.pageSize,
+        sort: {
+          empty: true,
+          sorted: false,
+          unsorted: true
+        },
+        offset: pageable.pageNumber * pageable.pageSize,
+        paged: true,
+        unpaged: false
+      }
+    };
+
+    return this.http.post<PaginatedData<Loan>>(this.urlEndPoint, searchDto);
   }
 
-  saveLoan(loan: Loan): Observable<Loan> {
-    return this.http.post<Loan>(this.urlEndPoint, loan);
+  saveLoan(loan: Loan): Observable<void> {
+    let url = this.urlEndPoint;
+    if (loan.id != null) {
+      url += '/' + loan.id;
+    }
+    return this.http.put<void>(url, loan);
   }
 
   deleteLoan(idLoan: number): Observable<void> {

@@ -61,7 +61,18 @@ export class ClientListPage implements OnInit {
   }
 
   deleteClient(client: Client) {
-    if (client.id === undefined) return;
+  if (client.id === undefined) return;
+
+  this.clientService.checkClientLoans(client.id).subscribe((hasLoans) => {
+    if (hasLoans) {
+      this.dialog.open(DialogConfirmationComponent, {
+        data: { 
+          title: 'Operación denegada', 
+          description: 'No se puede eliminar al cliente porque tiene préstamos asociados activos.<br> Revoca primero sus préstamos.' 
+        }
+      });
+      return;
+    }
 
     const dialogRef = this.dialog.open(DialogConfirmationComponent, {
       data: { 
@@ -72,10 +83,11 @@ export class ClientListPage implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.clientService.deleteCategory(client.id!).subscribe(() => {
+        this.clientService.deleteClient(client.id!).subscribe(() => {
           this.loadData();
         });
       }
     });
-  }
+  });
+}
 }

@@ -74,6 +74,24 @@ export class LoanListPage implements OnInit {
       });
   }
 
+  getGameTitle(gameId: any): string {
+  if (!this.games || this.games.length === 0) return 'Cargando juegos...';
+  if (!gameId) return 'Sin ID';
+  
+  console.log('Buscando juego con ID:', gameId, 'dentro de la lista:', this.games);
+  
+  const game = this.games.find(g => g.id == gameId);
+  return game ? game.title : `ID ${gameId} no encontrado`;
+}
+
+getClientName(clientId: any): string {
+  if (!this.clients || this.clients.length === 0) return 'Cargando clientes...';
+  if (!clientId) return 'Sin ID';
+  
+  const client = this.clients.find(c => c.id == clientId);
+  return client ? client.name : `ID ${clientId} no encontrado`;
+}
+
   cleanFilters() {
     this.filterGameId = null;
     this.filterClientId = null;

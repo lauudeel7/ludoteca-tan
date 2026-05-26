@@ -29,7 +29,7 @@ export class LoanEditComponent implements OnInit {
   private readonly gameService = inject(GameService);
   private readonly clientService = inject(ClientService);
   private readonly datePipe = inject(DatePipe);
-  
+
   protected readonly dialogRef = inject(MatDialogRef<LoanEditComponent>);
   protected readonly data = inject(MAT_DIALOG_DATA);
 
@@ -72,26 +72,33 @@ export class LoanEditComponent implements OnInit {
       return;
     }
 
-    const payload: Loan = {
+    const payload: any = {
       id: this.id() || undefined,
       game: { id: this.selectedGame.id },
-      client: { id: this.selectedClient.id, name: this.selectedClient.name },
-      startDate: this.datePipe.transform(this.startDate, 'yyyy-MM-dd')!,
-      endDate: this.datePipe.transform(this.endDate, 'yyyy-MM-dd')!
+      client: { id: this.selectedClient.id },
+      loanDate: this.datePipe.transform(this.startDate, 'yyyy-MM-dd')!,
+      returnDate: this.datePipe.transform(this.endDate, 'yyyy-MM-dd')!
     };
 
     this.loanService.saveLoan(payload).subscribe({
       next: () => this.dialogRef.close(true),
       error: (err) => {
-        if (err.error === 'ERR_GAME_ALREADY_LOANED') {
-          this.errorMessage.set('El juego ya está prestado a otro cliente en esas fechas');
-        } else if (err.error === 'ERR_CLIENT_MAX_LOANS') {
-          this.errorMessage.set('El cliente ya tiene el límite máximo de 2 juegos en esos días');
+        if (err.status === 400) {
+          const gameId = this.selectedGame?.id || this.data?.loan?.gameId;
+          const clientId = this.selectedClient?.id || this.data?.loan?.clientId;
+
+          const gameName = this.games.find(g => g.id == gameId)?.title || 'seleccionado';
+          const clientName = this.clients.find(c => c.id == clientId)?.name || 'seleccionado';
+
+          this.errorMessage.set(
+            `No se puede guardar: Comprueba si el juego "${gameName}" ya está prestado en estas fechas, o si el cliente "${clientName}" ya ha alcanzado el límite máximo de 2 préstamos activos.`
+          );
         } else {
-          this.errorMessage.set('Error en las reglas de negocio al guardar');
+          this.errorMessage.set('Error de conexión o servidor no disponible.');
         }
       }
     });
+
   }
 
   compareObjects(o1: any, o2: any): boolean {

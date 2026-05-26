@@ -39,7 +39,7 @@ export class ClientEditComponent implements OnInit {
             return;
         }
 
-        this.clientService.saveCategory({ id: this.id() || undefined, name: this.name.trim() }).subscribe({
+        this.clientService.saveClient({ id: this.id() || undefined, name: this.name.trim() }).subscribe({
             next: () => this.dialogRef.close(true),
             error: (err) => {
                 let msg = '';

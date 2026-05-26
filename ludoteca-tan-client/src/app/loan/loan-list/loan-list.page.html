@@ -42,23 +42,29 @@
 
     <ng-container matColumnDef="game">
       <mat-header-cell *matHeaderCellDef> Nombre del juego </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{ element.game.title }} </mat-cell>
+      <mat-cell *matCellDef="let element">
+        {{ getGameTitle(element.gameId || element.game?.id) }}
+      </mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="client">
       <mat-header-cell *matHeaderCellDef> Nombre del cliente </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{ element.client.name }} </mat-cell>
+      <mat-cell *matCellDef="let element">
+        {{ getClientName(element.clientId || element.client?.id) }}
+      </mat-cell>
     </ng-container>
+
 
     <ng-container matColumnDef="startDate">
       <mat-header-cell *matHeaderCellDef> Fecha de préstamo </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{ element.startDate | date:'dd/MM/yyyy' }} </mat-cell>
+      <mat-cell *matCellDef="let element"> {{ element.loanDate | date:'dd/MM/yyyy' }} </mat-cell>
     </ng-container>
 
     <ng-container matColumnDef="endDate">
       <mat-header-cell *matHeaderCellDef> Fecha de devolución </mat-header-cell>
-      <mat-cell *matCellDef="let element"> {{ element.endDate | date:'dd/MM/yyyy' }} </mat-cell>
+      <mat-cell *matCellDef="let element"> {{ element.returnDate | date:'dd/MM/yyyy' }} </mat-cell>
     </ng-container>
+
 
     <ng-container matColumnDef="action">
       <mat-header-cell *matHeaderCellDef></mat-header-cell>
@@ -76,7 +82,8 @@
     <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   </mat-table>
 
-  <mat-paginator (page)="loadPage($event)" [pageSizeOptions]="[5, 10, 20]" [pageIndex]="pageNumber" [pageSize]="pageSize" [length]="totalElements" showFirstLastButtons></mat-paginator>
+  <mat-paginator (page)="loadPage($event)" [pageSizeOptions]="[5, 10, 20]" [pageIndex]="pageNumber"
+    [pageSize]="pageSize" [length]="totalElements" showFirstLastButtons></mat-paginator>
 
   <div class="buttons-bottom">
     <button mat-flat-button class="btn-filter-primary" (click)="createLoan()">Nuevo préstamo</button>
