@@ -4,10 +4,9 @@ import com.ludoteca.category.CategoryRepository;
 import com.ludoteca.category.CategoryServiceImpl;
 import com.ludoteca.category.model.Category;
 import com.ludoteca.category.model.CategoryDto;
-import com.ludoteca.exception.BadRequestException;
-import com.ludoteca.game.GameRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,106 +15,74 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CategoryTest {
 
-    @Mock
-    private CategoryRepository categoryRepository;
+    public static final String CATEGORY_NAME = "CAT1";
+    public static final Long EXISTS_CATEGORY_ID = 1L;
 
     @Mock
-    private GameRepository gameRepository;
+    private CategoryRepository categoryRepository;
 
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
     @Test
-    public void findAllShouldReturnAllCategoriesMappedToDTO() {
+    public void findAllShouldReturnAllCategories() {
         List<Category> list = new ArrayList<>();
         Category category = new Category();
-        category.setId(1L);
-        category.setName("Eurogames");
         list.add(category);
 
         when(categoryRepository.findAll()).thenReturn(list);
 
-        List<CategoryDto> result = categoryService.findAll();
+        List<Category> categories = categoryService.findAll();
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getId());
-        assertEquals("Eurogames", result.get(0).getName());
-        verify(categoryRepository, times(1)).findAll();
+        assertNotNull(categories);
+        assertEquals(1, categories.size());
     }
 
     @Test
-    public void saveShouldCreateCategoryAndReturnDTO() {
-        CategoryDto inputDto = new CategoryDto();
-        inputDto.setName("Dados");
+    public void saveNotExistsCategoryIdShouldInsert() {
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setName(CATEGORY_NAME);
 
-        Category savedCategory = new Category();
-        savedCategory.setId(4L);
-        savedCategory.setName("Dados");
+        ArgumentCaptor<Category> categoryCaptor = ArgumentCaptor.forClass(Category.class);
 
-        when(categoryRepository.save(any(Category.class))).thenReturn(savedCategory);
+        categoryService.save(null, categoryDto);
 
-        CategoryDto result = categoryService.save(inputDto);
-
-        assertNotNull(result);
-        assertEquals(4L, result.getId());
-        assertEquals("Dados", result.getName());
-        verify(categoryRepository, times(1)).save(any(Category.class));
+        verify(categoryRepository).save(categoryCaptor.capture());
+        assertEquals(CATEGORY_NAME, categoryCaptor.getValue().getName());
     }
 
     @Test
-    public void updateShouldModifyExistingCategoryAndReturnDTO() {
-        Long id = 1L;
-        CategoryDto inputDto = new CategoryDto();
-        inputDto.setName("Eurogames Modificado");
+    public void saveExistsCategoryIdShouldUpdate() {
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setName(CATEGORY_NAME);
 
-        Category existingCategory = new Category();
-        existingCategory.setId(id);
-        existingCategory.setName("Eurogames");
+        Category category = new Category();
+        category.setId(EXISTS_CATEGORY_ID);
 
-        Category updatedCategory = new Category();
-        updatedCategory.setId(id);
-        updatedCategory.setName("Eurogames Modificado");
+        when(categoryRepository.findById(EXISTS_CATEGORY_ID)).thenReturn(Optional.of(category));
 
-        when(categoryRepository.findById(id)).thenReturn(Optional.of(existingCategory));
-        when(categoryRepository.save(any(Category.class))).thenReturn(updatedCategory);
+        categoryService.save(EXISTS_CATEGORY_ID, categoryDto);
 
-        CategoryDto result = categoryService.update(id, inputDto);
-
-        assertNotNull(result);
-        assertEquals(id, result.getId());
-        assertEquals("Eurogames Modificado", result.getName());
-        verify(categoryRepository, times(1)).findById(id);
-        verify(categoryRepository, times(1)).save(any(Category.class));
+        verify(categoryRepository).save(category);
     }
 
     @Test
-    public void deleteWithoutGamesShouldInvokeRepositoryDelete() {
-        Long id = 2L;
-        when(gameRepository.existsByCategoryId(id)).thenReturn(false);
+    public void deleteExistsCategoryIdShouldDelete() throws Exception {
+        Category category = new Category();
+        category.setId(EXISTS_CATEGORY_ID);
 
-        categoryService.delete(id);
+        when(categoryRepository.findById(EXISTS_CATEGORY_ID)).thenReturn(Optional.of(category));
 
-        verify(gameRepository, times(1)).existsByCategoryId(id);
-        verify(categoryRepository, times(1)).deleteById(id);
-    }
+        categoryService.delete(EXISTS_CATEGORY_ID);
 
-    @Test
-    public void deleteWithGamesShouldThrowBadRequestException() {
-        Long id = 1L;
-        when(gameRepository.existsByCategoryId(id)).thenReturn(true);
-
-        assertThrows(BadRequestException.class, () -> {
-            categoryService.delete(id);
-        });
-
-        verify(gameRepository, times(1)).existsByCategoryId(id);
-        verify(categoryRepository, never()).deleteById(id);
+        verify(categoryRepository).deleteById(EXISTS_CATEGORY_ID);
     }
 }

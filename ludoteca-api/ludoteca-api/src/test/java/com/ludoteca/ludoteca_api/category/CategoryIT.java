@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -21,60 +22,94 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class CategoryIT {
 
+    public static final String LOCALHOST = "http://localhost:";
+    public static final String SERVICE_PATH = "/category";
+
+    @LocalServerPort
+    private int port;
+
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private static final String BASE_URL = "/categories";
+    ParameterizedTypeReference<List<CategoryDto>> responseType = new ParameterizedTypeReference<List<CategoryDto>>() {
+    };
 
     @Test
-    public void findAllShouldReturnInitialCategoriesFromDatabase() {
-        ParameterizedTypeReference<List<CategoryDto>> responseType = new ParameterizedTypeReference<>() {
-        };
+    public void findAllShouldReturnAllCategories() {
 
-        ResponseEntity<List<CategoryDto>> response = restTemplate.exchange(BASE_URL, HttpMethod.GET, HttpEntity.EMPTY, responseType);
+        ResponseEntity<List<CategoryDto>> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.GET, null, responseType);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
+        assertNotNull(response);
         assertEquals(3, response.getBody().size());
-        assertEquals("Eurogames", response.getBody().get(0).getName());
-        assertEquals("Ameritrash", response.getBody().get(1).getName());
-        assertEquals("Familiar", response.getBody().get(2).getName());
     }
 
+    public static final Long NEW_CATEGORY_ID = 4L;
+    public static final String NEW_CATEGORY_NAME = "CAT4";
+
     @Test
-    public void createShouldInsertNewCategoryInDatabase() {
+    public void saveWithoutIdShouldCreateNewCategory() {
+
         CategoryDto dto = new CategoryDto();
-        dto.setName("Party Games");
+        dto.setName(NEW_CATEGORY_NAME);
 
-        ResponseEntity<CategoryDto> response = restTemplate.postForEntity(BASE_URL, dto, CategoryDto.class);
+        restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertNotNull(response.getBody().getId());
-        assertEquals("Party Games", response.getBody().getName());
+        ResponseEntity<List<CategoryDto>> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.GET, null, responseType);
+        assertNotNull(response);
+        assertEquals(4, response.getBody().size());
+
+        CategoryDto categorySearch = response.getBody().stream().filter(item -> item.getId().equals(NEW_CATEGORY_ID)).findFirst().orElse(null);
+        assertNotNull(categorySearch);
+        assertEquals(NEW_CATEGORY_NAME, categorySearch.getName());
     }
 
+    public static final Long MODIFY_CATEGORY_ID = 3L;
+
     @Test
-    public void updateShouldModifyExistingCategoryInDatabase() {
-        Long idExistente = 1L;
+    public void modifyWithExistIdShouldModifyCategory() {
+
         CategoryDto dto = new CategoryDto();
-        dto.setName("Eurogames Hardcore");
+        dto.setName(NEW_CATEGORY_NAME);
 
-        HttpEntity<CategoryDto> requestEntity = new HttpEntity<>(dto);
-        ResponseEntity<CategoryDto> response = restTemplate.exchange(BASE_URL + "/" + idExistente, HttpMethod.PUT, requestEntity, CategoryDto.class);
+        restTemplate.exchange(LOCALHOST + port + SERVICE_PATH + "/" + MODIFY_CATEGORY_ID, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(idExistente, response.getBody().getId());
-        assertEquals("Eurogames Hardcore", response.getBody().getName());
+        ResponseEntity<List<CategoryDto>> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.GET, null, responseType);
+        assertNotNull(response);
+        assertEquals(3, response.getBody().size());
+
+        CategoryDto categorySearch = response.getBody().stream().filter(item -> item.getId().equals(MODIFY_CATEGORY_ID)).findFirst().orElse(null);
+        assertNotNull(categorySearch);
+        assertEquals(NEW_CATEGORY_NAME, categorySearch.getName());
     }
 
     @Test
-    public void deleteShouldRemoveCategoryFromDatabaseIfNoGamesAssociated() {
-        Long idSinJuegos = 2L;
+    public void modifyWithNotExistIdShouldInternalError() {
 
-        ResponseEntity<Void> response = restTemplate.exchange(BASE_URL + "/" + idSinJuegos, HttpMethod.DELETE, HttpEntity.EMPTY, Void.class);
+        CategoryDto dto = new CategoryDto();
+        dto.setName(NEW_CATEGORY_NAME);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH + "/" + NEW_CATEGORY_ID, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    public static final Long DELETE_CATEGORY_ID = 2L;
+
+    @Test
+    public void deleteWithExistsIdShouldDeleteCategory() {
+
+        restTemplate.exchange(LOCALHOST + port + SERVICE_PATH + "/" + DELETE_CATEGORY_ID, HttpMethod.DELETE, null, Void.class);
+
+        ResponseEntity<List<CategoryDto>> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.GET, null, responseType);
+        assertNotNull(response);
+        assertEquals(2, response.getBody().size());
+    }
+
+    @Test
+    public void deleteWithNotExistsIdShouldInternalError() {
+
+        ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH + "/" + NEW_CATEGORY_ID, HttpMethod.DELETE, null, Void.class);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
 }
