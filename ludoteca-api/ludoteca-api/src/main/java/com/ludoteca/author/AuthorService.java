@@ -5,6 +5,8 @@ import com.ludoteca.author.model.AuthorDto;
 import com.ludoteca.author.model.AuthorSearchDto;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 /**
  * @author ccsw
  *
@@ -17,7 +19,7 @@ public interface AuthorService {
      * @return {@link Author}
      */
     Author get(Long id);
-    
+
     /**
      * Método para recuperar un listado paginado de {@link Author}
      *
@@ -40,5 +42,12 @@ public interface AuthorService {
      * @param id PK de la entidad
      */
     void delete(Long id) throws Exception;
+
+    /**
+     * Recupera un listado de autores {@link Author}
+     *
+     * @return {@link List} de {@link Author}
+     */
+    List<Author> findAll();
 
 }
