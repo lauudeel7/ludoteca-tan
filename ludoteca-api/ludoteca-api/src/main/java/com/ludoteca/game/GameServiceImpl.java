@@ -1,89 +1,69 @@
 package com.ludoteca.game;
 
-import com.ludoteca.author.model.Author;
-import com.ludoteca.category.model.Category;
+import com.ludoteca.author.AuthorService;
+import com.ludoteca.category.CategoryService;
+import com.ludoteca.common.criteria.SearchCriteria;
 import com.ludoteca.game.model.Game;
-import com.ludoteca.game.model.GameDTO;
+import com.ludoteca.game.model.GameDto;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * @author ccsw
+ *
+ */
 @Service
+@Transactional
 public class GameServiceImpl implements GameService {
 
     @Autowired
-    private GameRepository gameRepository;
+    GameRepository gameRepository;
 
+    @Autowired
+    AuthorService authorService;
+
+    @Autowired
+    CategoryService categoryService;
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<GameDTO> find(String title, Long categoryId) {
+    public List<Game> find(String title, Long idCategory) {
 
-        List<Game> games;
+        GameSpecification titleSpec = new GameSpecification(new SearchCriteria("title", ":", title));
+        GameSpecification categorySpec = new GameSpecification(new SearchCriteria("category.id", ":", idCategory));
+        
+        Specification<Game> spec = titleSpec.and(categorySpec);
 
-        if (title != null && !title.isBlank() && categoryId != null) {
-            games = gameRepository.findByTitleContainingIgnoreCaseAndCategoryId(title, categoryId);
-        } else if (title != null && !title.isBlank()) {
-            games = gameRepository.findByTitleContainingIgnoreCase(title);
-        } else if (categoryId != null) {
-            games = gameRepository.findByCategoryId(categoryId);
+        return this.gameRepository.findAll(spec);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void save(Long id, GameDto dto) {
+
+        Game game;
+
+        if (id == null) {
+            game = new Game();
         } else {
-            games = gameRepository.findAll();
+            game = this.gameRepository.findById(id).orElse(null);
         }
 
-        return games.stream().map(this::mapToDTO).toList();
+        BeanUtils.copyProperties(dto, game, "id", "author", "category");
+
+        game.setAuthor(authorService.get(dto.getAuthor().getId()));
+        game.setCategory(categoryService.get(dto.getCategory().getId()));
+
+        this.gameRepository.save(game);
     }
 
-    @Override
-    public GameDTO findById(Long id) {
-        return mapToDTO(gameRepository.findById(id).orElseThrow());
-    }
-
-    @Override
-    public GameDTO save(GameDTO dto) {
-        Game game = mapToEntity(dto);
-        return mapToDTO(gameRepository.save(game));
-    }
-
-    @Override
-    public GameDTO update(Long id, GameDTO dto) {
-        Game game = gameRepository.findById(id).orElseThrow();
-
-        game.setTitle(dto.getTitle());
-        game.setAge(dto.getAge());
-
-        return mapToDTO(gameRepository.save(game));
-    }
-
-    private GameDTO mapToDTO(Game g) {
-        GameDTO dto = new GameDTO();
-        dto.setId(g.getId());
-        dto.setTitle(g.getTitle());
-        dto.setAge(g.getAge());
-
-        dto.setCategoryId(g.getCategory().getId());
-        dto.setCategoryName(g.getCategory().getName());
-
-        dto.setAuthorId(g.getAuthor().getId());
-        dto.setAuthorName(g.getAuthor().getName());
-        dto.setAuthorNationality(g.getAuthor().getNationality());
-
-        return dto;
-    }
-
-    private Game mapToEntity(GameDTO dto) {
-        Game game = new Game();
-        game.setTitle(dto.getTitle());
-        game.setAge(dto.getAge());
-
-        Category category = new Category();
-        category.setId(dto.getCategoryId());
-
-        Author author = new Author();
-        author.setId(dto.getAuthorId());
-
-        game.setCategory(category);
-        game.setAuthor(author);
-
-        return game;
-    }
 }

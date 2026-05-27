@@ -1,15 +1,27 @@
 package com.ludoteca.game;
 
-import com.ludoteca.game.model.GameDTO;
+import com.ludoteca.game.model.Game;
+import com.ludoteca.game.model.GameDto;
 
 import java.util.List;
 
 public interface GameService {
-    List<GameDTO> find(String title, Long categoryId);
 
-    GameDTO findById(Long id);
+    /**
+     * Recupera los juegos filtrando opcionalmente por título y/o categoría
+     *
+     * @param title título del juego
+     * @param idCategory PK de la categoría
+     * @return {@link List} de {@link Game}
+     */
+    List<Game> find(String title, Long idCategory);
 
-    GameDTO save(GameDTO dto);
+    /**
+     * Guarda o modifica un juego, dependiendo de si el identificador está o no informado
+     *
+     * @param id PK de la entidad
+     * @param dto datos de la entidad
+     */
+    void save(Long id, GameDto dto);
 
-    GameDTO update(Long id, GameDTO dto);
 }

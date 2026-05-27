@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,23 +30,26 @@ public class AuthorTest {
 
     @Test
     public void getExistsAuthorIdShouldReturnAuthor() {
-        Author author = new Author();
-        author.setId(EXISTS_AUTHOR_ID);
 
+        Author author = mock(Author.class);
+        when(author.getId()).thenReturn(EXISTS_AUTHOR_ID);
         when(authorRepository.findById(EXISTS_AUTHOR_ID)).thenReturn(Optional.of(author));
 
         Author authorResponse = authorService.get(EXISTS_AUTHOR_ID);
 
         assertNotNull(authorResponse);
+
         assertEquals(EXISTS_AUTHOR_ID, authorResponse.getId());
     }
 
     @Test
     public void getNotExistsAuthorIdShouldReturnNull() {
+
         when(authorRepository.findById(NOT_EXISTS_AUTHOR_ID)).thenReturn(Optional.empty());
 
         Author author = authorService.get(NOT_EXISTS_AUTHOR_ID);
 
         assertNull(author);
     }
+
 }

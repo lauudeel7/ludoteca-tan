@@ -1,35 +1,23 @@
 package com.ludoteca.game.model;
 
-import com.ludoteca.author.model.Author;
-import com.ludoteca.category.model.Category;
-import jakarta.persistence.*;
+import com.ludoteca.author.model.AuthorDto;
+import com.ludoteca.category.model.CategoryDto;
 
 /**
  * @author ccsw
  *
  */
-@Entity
-@Table(name = "game")
-public class Game {
+public class GameDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "age", nullable = false)
     private String age;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    private CategoryDto category;
 
-    @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
-    private Author author;
+    private AuthorDto author;
 
     /**
      * @return id
@@ -82,7 +70,7 @@ public class Game {
     /**
      * @return category
      */
-    public Category getCategory() {
+    public CategoryDto getCategory() {
 
         return this.category;
     }
@@ -90,7 +78,7 @@ public class Game {
     /**
      * @param category new value of {@link #getCategory}.
      */
-    public void setCategory(Category category) {
+    public void setCategory(CategoryDto category) {
 
         this.category = category;
     }
@@ -98,7 +86,7 @@ public class Game {
     /**
      * @return author
      */
-    public Author getAuthor() {
+    public AuthorDto getAuthor() {
 
         return this.author;
     }
@@ -106,7 +94,7 @@ public class Game {
     /**
      * @param author new value of {@link #getAuthor}.
      */
-    public void setAuthor(Author author) {
+    public void setAuthor(AuthorDto author) {
 
         this.author = author;
     }

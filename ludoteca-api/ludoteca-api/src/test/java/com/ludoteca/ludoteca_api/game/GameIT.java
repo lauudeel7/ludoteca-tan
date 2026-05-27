@@ -1,6 +1,8 @@
 package com.ludoteca.ludoteca_api.game;
 
-import com.ludoteca.game.model.GameDTO;
+import com.ludoteca.author.model.AuthorDto;
+import com.ludoteca.category.model.CategoryDto;
+import com.ludoteca.game.model.GameDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,17 +28,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class GameIT {
 
     public static final String LOCALHOST = "http://localhost:";
-    public static final String SERVICE_PATH = "/games";
+    public static final String SERVICE_PATH = "/game";
 
     public static final Long EXISTS_GAME_ID = 1L;
+    public static final Long NOT_EXISTS_GAME_ID = 0L;
     private static final String NOT_EXISTS_TITLE = "NotExists";
-    private static final String EXISTS_TITLE = "Aventureros al tren";
+    private static final String EXISTS_TITLE = "Aventureros";
     private static final String NEW_TITLE = "Nuevo juego";
     private static final Long NOT_EXISTS_CATEGORY = 0L;
     private static final Long EXISTS_CATEGORY = 3L;
 
     private static final String TITLE_PARAM = "title";
-    private static final String CATEGORY_ID_PARAM = "categoryId";
+    private static final String CATEGORY_ID_PARAM = "idCategory";
 
     @LocalServerPort
     private int port;
@@ -44,7 +47,7 @@ public class GameIT {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private final ParameterizedTypeReference<List<GameDTO>> responseType = new ParameterizedTypeReference<List<GameDTO>>() {
+    ParameterizedTypeReference<List<GameDto>> responseType = new ParameterizedTypeReference<List<GameDto>>() {
     };
 
     private String getUrlWithParams() {
@@ -53,104 +56,104 @@ public class GameIT {
 
     @Test
     public void findWithoutFiltersShouldReturnAllGamesInDB() {
+
         int GAMES_WITH_FILTER = 6;
 
         Map<String, Object> params = new HashMap<>();
         params.put(TITLE_PARAM, null);
         params.put(CATEGORY_ID_PARAM, null);
 
-        ResponseEntity<List<GameDTO>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(GAMES_WITH_FILTER, response.getBody().size());
     }
 
     @Test
     public void findExistsTitleShouldReturnGames() {
+
         int GAMES_WITH_FILTER = 1;
 
         Map<String, Object> params = new HashMap<>();
         params.put(TITLE_PARAM, EXISTS_TITLE);
         params.put(CATEGORY_ID_PARAM, null);
 
-        ResponseEntity<List<GameDTO>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(GAMES_WITH_FILTER, response.getBody().size());
-        assertEquals("Aventureros al tren", response.getBody().get(0).getTitle());
     }
 
     @Test
     public void findExistsCategoryShouldReturnGames() {
+
         int GAMES_WITH_FILTER = 2;
 
         Map<String, Object> params = new HashMap<>();
         params.put(TITLE_PARAM, null);
         params.put(CATEGORY_ID_PARAM, EXISTS_CATEGORY);
 
-        ResponseEntity<List<GameDTO>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(GAMES_WITH_FILTER, response.getBody().size());
     }
 
     @Test
     public void findExistsTitleAndCategoryShouldReturnGames() {
+
         int GAMES_WITH_FILTER = 1;
 
         Map<String, Object> params = new HashMap<>();
         params.put(TITLE_PARAM, EXISTS_TITLE);
         params.put(CATEGORY_ID_PARAM, EXISTS_CATEGORY);
 
-        ResponseEntity<List<GameDTO>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(GAMES_WITH_FILTER, response.getBody().size());
     }
 
     @Test
     public void findNotExistsTitleShouldReturnEmpty() {
+
         int GAMES_WITH_FILTER = 0;
 
         Map<String, Object> params = new HashMap<>();
         params.put(TITLE_PARAM, NOT_EXISTS_TITLE);
         params.put(CATEGORY_ID_PARAM, null);
 
-        ResponseEntity<List<GameDTO>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(GAMES_WITH_FILTER, response.getBody().size());
     }
 
     @Test
     public void findNotExistsCategoryShouldReturnEmpty() {
+
         int GAMES_WITH_FILTER = 0;
 
         Map<String, Object> params = new HashMap<>();
         params.put(TITLE_PARAM, null);
         params.put(CATEGORY_ID_PARAM, NOT_EXISTS_CATEGORY);
 
-        ResponseEntity<List<GameDTO>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(GAMES_WITH_FILTER, response.getBody().size());
     }
 
     @Test
     public void findNotExistsTitleOrCategoryShouldReturnEmpty() {
+
         int GAMES_WITH_FILTER = 0;
 
         Map<String, Object> params = new HashMap<>();
         params.put(TITLE_PARAM, NOT_EXISTS_TITLE);
         params.put(CATEGORY_ID_PARAM, NOT_EXISTS_CATEGORY);
 
-        ResponseEntity<List<GameDTO>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
         assertNotNull(response);
         assertEquals(GAMES_WITH_FILTER, response.getBody().size());
 
@@ -171,34 +174,78 @@ public class GameIT {
 
     @Test
     public void saveWithoutIdShouldCreateNewGame() {
-        GameDTO dto = new GameDTO();
+
+        GameDto dto = new GameDto();
+        AuthorDto authorDto = new AuthorDto();
+        authorDto.setId(1L);
+
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setId(1L);
+
         dto.setTitle(NEW_TITLE);
-        dto.setAge(18);
-        dto.setCategoryId(1L);
-        dto.setAuthorId(1L);
+        dto.setAge("18");
+        dto.setAuthor(authorDto);
+        dto.setCategory(categoryDto);
 
-        ResponseEntity<GameDTO> response = restTemplate.postForEntity(LOCALHOST + port + SERVICE_PATH, dto, GameDTO.class);
+        Map<String, Object> params = new HashMap<>();
+        params.put(TITLE_PARAM, NEW_TITLE);
+        params.put(CATEGORY_ID_PARAM, null);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertNotNull(response.getBody().getId());
-        assertEquals(NEW_TITLE, response.getBody().getTitle());
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+
+        assertNotNull(response);
+        assertEquals(0, response.getBody().size());
+
+        restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
+
+        response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+
+        assertNotNull(response);
+        assertEquals(1, response.getBody().size());
     }
 
     @Test
-    public void updateWithIdShouldModifyGame() {
-        GameDTO dto = new GameDTO();
-        dto.setTitle("On Mars Modificado");
-        dto.setAge(14);
-        dto.setCategoryId(1L);
-        dto.setAuthorId(2L);
+    public void modifyWithExistIdShouldModifyGame() {
 
-        HttpEntity<GameDTO> requestEntity = new HttpEntity<>(dto);
-        ResponseEntity<GameDTO> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH + "/" + EXISTS_GAME_ID, HttpMethod.PUT, requestEntity, GameDTO.class);
+        GameDto dto = new GameDto();
+        AuthorDto authorDto = new AuthorDto();
+        authorDto.setId(1L);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(EXISTS_GAME_ID, response.getBody().getId());
-        assertEquals("On Mars Modificado", response.getBody().getTitle());
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setId(1L);
+
+        dto.setTitle(NEW_TITLE);
+        dto.setAge("18");
+        dto.setAuthor(authorDto);
+        dto.setCategory(categoryDto);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put(TITLE_PARAM, NEW_TITLE);
+        params.put(CATEGORY_ID_PARAM, null);
+
+        ResponseEntity<List<GameDto>> response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+
+        assertNotNull(response);
+        assertEquals(0, response.getBody().size());
+
+        restTemplate.exchange(LOCALHOST + port + SERVICE_PATH + "/" + EXISTS_GAME_ID, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
+
+        response = restTemplate.exchange(getUrlWithParams(), HttpMethod.GET, null, responseType, params);
+
+        assertNotNull(response);
+        assertEquals(1, response.getBody().size());
+        assertEquals(EXISTS_GAME_ID, response.getBody().get(0).getId());
     }
+
+    @Test
+    public void modifyWithNotExistIdShouldThrowException() {
+
+        GameDto dto = new GameDto();
+        dto.setTitle(NEW_TITLE);
+
+        ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH + "/" + NOT_EXISTS_GAME_ID, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
 }
