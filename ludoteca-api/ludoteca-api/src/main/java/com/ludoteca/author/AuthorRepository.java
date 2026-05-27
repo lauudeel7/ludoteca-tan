@@ -1,8 +1,22 @@
 package com.ludoteca.author;
 
 import com.ludoteca.author.model.Author;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.CrudRepository;
 
-public interface AuthorRepository extends JpaRepository<Author, Long> {
-    boolean existsByName(String name);
+/**
+ * @author ccsw
+ *
+ */
+public interface AuthorRepository extends CrudRepository<Author, Long> {
+
+    /**
+     * Método para recuperar un listado paginado de {@link Author}
+     *
+     * @param pageable pageable
+     * @return {@link Page} de {@link Author}
+     */
+    Page<Author> findAll(Pageable pageable);
+
 }

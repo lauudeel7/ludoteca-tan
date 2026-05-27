@@ -1,15 +1,44 @@
 package com.ludoteca.author;
 
-import com.ludoteca.author.model.AuthorDTO;
+import com.ludoteca.author.model.Author;
+import com.ludoteca.author.model.AuthorDto;
+import com.ludoteca.author.model.AuthorSearchDto;
 import org.springframework.data.domain.Page;
 
+/**
+ * @author ccsw
+ *
+ */
 public interface AuthorService {
+    /**
+     * Recupera un {@link Author} a través de su ID
+     *
+     * @param id PK de la entidad
+     * @return {@link Author}
+     */
+    Author get(Long id);
+    
+    /**
+     * Método para recuperar un listado paginado de {@link Author}
+     *
+     * @param dto dto de búsqueda
+     * @return {@link Page} de {@link Author}
+     */
+    Page<Author> findPage(AuthorSearchDto dto);
 
-    Page<AuthorDTO> findAll(int page, int size);
+    /**
+     * Método para crear o actualizar un {@link Author}
+     *
+     * @param id PK de la entidad
+     * @param dto datos de la entidad
+     */
+    void save(Long id, AuthorDto dto);
 
-    AuthorDTO save(AuthorDTO dto);
+    /**
+     * Método para crear o actualizar un {@link Author}
+     *
+     * @param id PK de la entidad
+     */
+    void delete(Long id) throws Exception;
 
-    AuthorDTO update(Long id, AuthorDTO dto);
-
-    void delete(Long id);
 }

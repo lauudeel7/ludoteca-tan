@@ -1,69 +1,73 @@
 package com.ludoteca.author;
 
 import com.ludoteca.author.model.Author;
-import com.ludoteca.author.model.AuthorDTO;
-import com.ludoteca.exception.BadRequestException;
-import com.ludoteca.game.GameRepository;
+import com.ludoteca.author.model.AuthorDto;
+import com.ludoteca.author.model.AuthorSearchDto;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author ccsw
+ *
+ */
 @Service
+@Transactional
 public class AuthorServiceImpl implements AuthorService {
-    @Autowired
-    private AuthorRepository authorRepository;
 
     @Autowired
-    private GameRepository gameRepository;
+    AuthorRepository authorRepository;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Page<AuthorDTO> findAll(int page, int size) {
-        return authorRepository.findAll(PageRequest.of(page, size)).map(this::mapToDTO);
+    public Author get(Long id) {
+
+        return this.authorRepository.findById(id).orElse(null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public AuthorDTO save(AuthorDTO dto) {
-        if (authorRepository.existsByName(dto.getName())) {
-            throw new BadRequestException("Ya existe un autor registrado con ese nombre.");
-        }
-        Author author = new Author();
-        author.setName(dto.getName());
-        author.setNationality(dto.getNationality());
+    public Page<Author> findPage(AuthorSearchDto dto) {
 
-        return mapToDTO(authorRepository.save(author));
+        return this.authorRepository.findAll(dto.getPageable().getPageable());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public AuthorDTO update(Long id, AuthorDTO dto) {
-        Author author = authorRepository.findById(id).orElseThrow();
+    public void save(Long id, AuthorDto data) {
 
-        if (!author.getName().equalsIgnoreCase(dto.getName()) && authorRepository.existsByName(dto.getName())) {
-            throw new BadRequestException("Ya existe un autor registrado con ese nombre.");
-        }
+        Author author;
 
-        author.setName(dto.getName());
-        author.setNationality(dto.getNationality());
-
-        return mapToDTO(authorRepository.save(author));
-    }
-
-    @Override
-    public void delete(Long id) {
-        boolean hasGames = gameRepository.existsByAuthorId(id);
-
-        if (hasGames) {
-            throw new BadRequestException("No se puede eliminar el autor. Tiene juegos asociados.");
+        if (id == null) {
+            author = new Author();
+        } else {
+            author = this.authorRepository.findById(id).orElse(null);
         }
 
-        authorRepository.deleteById(id);
+        BeanUtils.copyProperties(data, author, "id");
+
+        this.authorRepository.save(author);
     }
 
-    private AuthorDTO mapToDTO(Author a) {
-        AuthorDTO dto = new AuthorDTO();
-        dto.setId(a.getId());
-        dto.setName(a.getName());
-        dto.setNationality(a.getNationality());
-        return dto;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void delete(Long id) throws Exception {
+
+        if (this.authorRepository.findById(id).orElse(null) == null) {
+            throw new Exception("Not exists");
+        }
+
+        this.authorRepository.deleteById(id);
     }
+
 }

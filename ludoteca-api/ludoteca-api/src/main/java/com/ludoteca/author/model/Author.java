@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "author")
 public class Author {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -16,36 +17,52 @@ public class Author {
     @Column(name = "nationality")
     private String nationality;
 
-    public Author() {
-    }
-
-    public Author(Long id, String name, String nationality) {
-        this.id = id;
-        this.name = name;
-        this.nationality = nationality;
-    }
-
+    /**
+     * @return id
+     */
     public Long getId() {
-        return id;
+
+        return this.id;
     }
 
+    /**
+     * @param id new value of {@link #getId}.
+     */
     public void setId(Long id) {
+
         this.id = id;
     }
 
+    /**
+     * @return name
+     */
     public String getName() {
-        return name;
+
+        return this.name;
     }
 
+    /**
+     * @param name new value of {@link #getName}.
+     */
     public void setName(String name) {
+
         this.name = name;
     }
 
+    /**
+     * @return nationality
+     */
     public String getNationality() {
-        return nationality;
+
+        return this.nationality;
     }
 
+    /**
+     * @param nationality new value of {@link #getNationality}.
+     */
     public void setNationality(String nationality) {
+
         this.nationality = nationality;
     }
+
 }

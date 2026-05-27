@@ -1,41 +1,72 @@
 package com.ludoteca.author;
 
-import com.ludoteca.author.model.AuthorDTO;
+import com.ludoteca.author.model.Author;
+import com.ludoteca.author.model.AuthorDto;
+import com.ludoteca.author.model.AuthorSearchDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.stream.Collectors;
+
+/**
+ * @author ccsw
+ *
+ */
+@Tag(name = "Author", description = "API of Author")
+@RequestMapping(value = "/author")
 @RestController
-@RequestMapping("/authors")
 @CrossOrigin(origins = "*")
 public class AuthorController {
 
     @Autowired
-    private AuthorService authorService;
+    AuthorService authorService;
 
-    @GetMapping
-    public Page<AuthorDTO> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
-        return authorService.findAll(page, size);
+    @Autowired
+    ModelMapper mapper;
+
+    /**
+     * Método para recuperar un listado paginado de {@link Author}
+     *
+     * @param dto dto de búsqueda
+     * @return {@link Page} de {@link AuthorDto}
+     */
+    @Operation(summary = "Find Page", description = "Method that return a page of Authors")
+    @RequestMapping(path = "", method = RequestMethod.POST)
+    public Page<AuthorDto> findPage(@RequestBody AuthorSearchDto dto) {
+
+        Page<Author> page = this.authorService.findPage(dto);
+
+        return new PageImpl<>(page.getContent().stream().map(e -> mapper.map(e, AuthorDto.class)).collect(Collectors.toList()), page.getPageable(), page.getTotalElements());
     }
 
-    @PostMapping
-    public AuthorDTO create(@RequestBody AuthorDTO dto) {
-        return authorService.save(dto);
+    /**
+     * Método para crear o actualizar un {@link Author}
+     *
+     * @param id PK de la entidad
+     * @param dto datos de la entidad
+     */
+    @Operation(summary = "Save or Update", description = "Method that saves or updates a Author")
+    @RequestMapping(path = { "", "/{id}" }, method = RequestMethod.PUT)
+    public void save(@PathVariable(name = "id", required = false) Long id, @RequestBody AuthorDto dto) {
+
+        this.authorService.save(id, dto);
     }
 
-    @PutMapping(value = { "", "/{id}" })
-    public AuthorDTO update(@PathVariable(required = false) Long id, @RequestBody AuthorDTO dto) {
-        Long targetId = (id != null) ? id : dto.getId();
+    /**
+     * Método para crear o actualizar un {@link Author}
+     *
+     * @param id PK de la entidad
+     */
+    @Operation(summary = "Delete", description = "Method that deletes a Author")
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public void delete(@PathVariable("id") Long id) throws Exception {
 
-        if (targetId == null) {
-            return authorService.save(dto);
-        }
-
-        return authorService.update(targetId, dto);
+        this.authorService.delete(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        authorService.delete(id);
-    }
 }

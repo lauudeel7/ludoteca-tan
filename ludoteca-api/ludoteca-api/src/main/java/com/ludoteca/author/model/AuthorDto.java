@@ -1,6 +1,10 @@
 package com.ludoteca.author.model;
 
-public class AuthorDTO {
+/**
+ * @author ccsw
+ *
+ */
+public class AuthorDto {
 
     private Long id;
 
@@ -8,27 +12,52 @@ public class AuthorDTO {
 
     private String nationality;
 
+    /**
+     * @return id
+     */
     public Long getId() {
-        return id;
+
+        return this.id;
     }
 
+    /**
+     * @param id new value of {@link #getId}.
+     */
     public void setId(Long id) {
+
         this.id = id;
     }
 
+    /**
+     * @return name
+     */
     public String getName() {
-        return name;
+
+        return this.name;
     }
 
+    /**
+     * @param name new value of {@link #getName}.
+     */
     public void setName(String name) {
+
         this.name = name;
     }
 
+    /**
+     * @return nationality
+     */
     public String getNationality() {
-        return nationality;
+
+        return this.nationality;
     }
 
+    /**
+     * @param nationality new value of {@link #getNationality}.
+     */
     public void setNationality(String nationality) {
+
         this.nationality = nationality;
     }
+
 }
