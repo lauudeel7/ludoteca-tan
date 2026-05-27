@@ -63,25 +63,14 @@ export class CategoryListPage implements OnInit {
   }
 
   deleteCategory(category: Category) {
-    if (category.id === undefined) return;
+    const dialogRef = this.dialog.open(DialogConfirmationComponent, {
+      data: { title: 'Eliminar categoría', description: 'Atención si borra la categoría se perderán sus datos.<br> ¿Desea eliminar la categoría?' }
+    });
 
-    this.dialog.open(DialogConfirmationComponent, {
-      data: {
-        title: 'Eliminar categoría',
-        description: '¿Desea eliminar la categoría?'
-      }
-    }).afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.categoryService.deleteCategory(category.id!).subscribe({
-          next: () => this.loadData(),
-          error: () => {
-            this.dialog.open(DialogErrorComponent, {
-              data: {
-                title: 'Aviso del sistema',
-                description: 'No se puede eliminar la categoría: Tiene juegos asociados en el catálogo.'
-              }
-            });
-          }
+        this.categoryService.deleteCategory(category.id).subscribe(() => {
+          this.loadData();
         });
       }
     });

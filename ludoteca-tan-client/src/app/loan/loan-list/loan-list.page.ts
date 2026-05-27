@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef  } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -38,6 +38,7 @@ export class LoanListPage implements OnInit {
   private readonly clientService = inject(ClientService);
   private readonly dialog = inject(MatDialog);
   private readonly datePipe = inject(DatePipe);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   pageNumber: number = 0;
   pageSize: number = 5;
@@ -53,8 +54,14 @@ export class LoanListPage implements OnInit {
   displayedColumns: string[] = ['id', 'game', 'client', 'startDate', 'endDate', 'action'];
 
   ngOnInit(): void {
-    this.gameService.getGames().subscribe(res => this.games = res ?? []);
-    this.clientService.getClients().subscribe(res => this.clients = res ?? []);
+    this.gameService.getGames().subscribe(res => {
+      this.games = res ?? [];
+      this.cdr.detectChanges();
+    });
+    this.clientService.getClients().subscribe(res => {
+      this.clients = res ?? [];
+      this.cdr.detectChanges(); 
+    });
     this.loadPage();
   }
 
@@ -71,18 +78,19 @@ export class LoanListPage implements OnInit {
       .subscribe(data => {
         this.dataSource.data = data.content ?? [];
         this.totalElements = data.totalElements;
+        this.cdr.detectChanges(); 
       });
   }
 
   getGameTitle(gameId: any): string {
-  if (!this.games || this.games.length === 0) return 'Cargando juegos...';
-  if (!gameId) return 'Sin ID';
-  
-  console.log('Buscando juego con ID:', gameId, 'dentro de la lista:', this.games);
-  
-  const game = this.games.find(g => g.id == gameId);
-  return game ? game.title : `ID ${gameId} no encontrado`;
-}
+    if (!this.games || this.games.length === 0) return 'Cargando juegos...';
+    if (!gameId) return 'Sin ID';
+    
+    console.log('Buscando juego con ID:', gameId, 'dentro de la lista:', this.games);
+    
+    const game = this.games.find(g => g.id == gameId);
+    return game ? game.title : `ID ${gameId} no encontrado`;
+  }
 
 getClientName(clientId: any): string {
   if (!this.clients || this.clients.length === 0) return 'Cargando clientes...';

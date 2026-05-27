@@ -7,27 +7,21 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root',
 })
 export class CategoryService {
+  constructor(private http: HttpClient) {}
 
-  urlEndPoint = 'http://localhost:8080/category';
-
-  constructor(private httpClient: HttpClient) {}
+  private baseUrl = 'http://localhost:8080/category';
 
   getCategories(): Observable<Category[]> {
-    return this.httpClient.get<Category[]>(this.urlEndPoint);
+    return this.http.get<Category[]>(this.baseUrl);
   }
 
   saveCategory(category: Category): Observable<Category> {
-    let url = this.urlEndPoint;
-    
-    if (category.id != null){
-        url += '/'+ category.id;
-        return this.httpClient.put<Category>(url, category);
-    } else{
-        return this.httpClient.post<Category>(url, category);
-    }
+    const { id } = category;
+    const url = id ? `${this.baseUrl}/${id}` : this.baseUrl;
+    return this.http.put<Category>(url, category);
   }
 
-  deleteCategory(idCategory : number): Observable<void> {
-    return this.httpClient.delete<void>(this.urlEndPoint + '/' + idCategory);
+  deleteCategory(idCategory : number): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/${idCategory}`);
   }  
 }

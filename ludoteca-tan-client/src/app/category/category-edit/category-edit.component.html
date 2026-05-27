@@ -1,21 +1,21 @@
 <div class="container">
-    <h1>{{ id() ? 'Modificar categoría' : 'Crear categoría' }}</h1>
+    @if (id()) {
+        <h1>Modificar categoría</h1>
+    } @else {
+        <h1>Crear categoría</h1>
+    }
 
-    <form #categoryForm="ngForm">
-        <mat-form-field appearance="outline">
+    <form>
+        <mat-form-field>
             <mat-label>Identificador</mat-label>
-            <input type="text" matInput placeholder="Identificador" [value]="id() ?? ''" name="id" disabled>
+            <input type="text" matInput placeholder="Identificador" [(ngModel)]="id" name="id" disabled>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
-            <mat-label>Nombre *</mat-label>
-            <input type="text" matInput placeholder="Nombre de categoría" [(ngModel)]="name" name="name" required
-                (input)="errorMessage.set('')">
+        <mat-form-field>
+            <mat-label>Nombre</mat-label>
+            <input type="text" matInput placeholder="Nombre de categoría" [(ngModel)]="name" name="name" required>
+            <mat-error>El nombre no puede estar vacío</mat-error>
         </mat-form-field>
-
-        @if (errorMessage()) {
-        <div class="alert-error-msg">{{ errorMessage() }}</div>
-        }
     </form>
 
     <div class="buttons">
