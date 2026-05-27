@@ -1,36 +1,69 @@
 package com.ludoteca.category;
 
-import com.ludoteca.category.model.CategoryDTO;
+import com.ludoteca.category.model.Category;
+import com.ludoteca.category.model.CategoryDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * @author ccsw
+ *
+ */
+@Tag(name = "Category", description = "API of Category")
+@RequestMapping(value = "/category")
 @RestController
-@RequestMapping("/categories")
 @CrossOrigin(origins = "*")
 public class CategoryController {
 
     @Autowired
-    private CategoryService categoryService;
+    CategoryService categoryService;
 
-    @GetMapping
-    public List<CategoryDTO> findAll() {
-        return categoryService.findAll();
+    @Autowired
+    ModelMapper mapper;
+
+    /**
+     * Método para recuperar todas las {@link Category}
+     *
+     * @return {@link List} de {@link CategoryDto}
+     */
+    @Operation(summary = "Find", description = "Method that return a list of Categories")
+    @RequestMapping(path = "", method = RequestMethod.GET)
+    public List<CategoryDto> findAll() {
+
+        List<Category> categories = this.categoryService.findAll();
+
+        return categories.stream().map(e -> mapper.map(e, CategoryDto.class)).collect(Collectors.toList());
     }
 
-    @PostMapping
-    public CategoryDTO create(@RequestBody CategoryDTO dto) {
-        return categoryService.save(dto);
+    /**
+     * Método para crear o actualizar una {@link Category}
+     *
+     * @param id PK de la entidad
+     * @param dto datos de la entidad
+     */
+    @Operation(summary = "Save or Update", description = "Method that saves or updates a Category")
+    @RequestMapping(path = { "", "/{id}" }, method = RequestMethod.PUT)
+    public void save(@PathVariable(name = "id", required = false) Long id, @RequestBody CategoryDto dto) {
+
+        this.categoryService.save(id, dto);
     }
 
-    @PutMapping("/{id}")
-    public CategoryDTO update(@PathVariable Long id, @RequestBody CategoryDTO dto) {
-        return categoryService.update(id, dto);
+    /**
+     * Método para borrar una {@link Category}
+     *
+     * @param id PK de la entidad
+     */
+    @Operation(summary = "Delete", description = "Method that deletes a Category")
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public void delete(@PathVariable("id") Long id) throws Exception {
+
+        this.categoryService.delete(id);
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        categoryService.delete(id);
-    }
 }

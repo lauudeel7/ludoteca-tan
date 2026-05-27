@@ -3,7 +3,7 @@ package com.ludoteca.ludoteca_api.category;
 import com.ludoteca.category.CategoryRepository;
 import com.ludoteca.category.CategoryServiceImpl;
 import com.ludoteca.category.model.Category;
-import com.ludoteca.category.model.CategoryDTO;
+import com.ludoteca.category.model.CategoryDto;
 import com.ludoteca.exception.BadRequestException;
 import com.ludoteca.game.GameRepository;
 import org.junit.jupiter.api.Test;
@@ -41,7 +41,7 @@ public class CategoryTest {
 
         when(categoryRepository.findAll()).thenReturn(list);
 
-        List<CategoryDTO> result = categoryService.findAll();
+        List<CategoryDto> result = categoryService.findAll();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -52,7 +52,7 @@ public class CategoryTest {
 
     @Test
     public void saveShouldCreateCategoryAndReturnDTO() {
-        CategoryDTO inputDto = new CategoryDTO();
+        CategoryDto inputDto = new CategoryDto();
         inputDto.setName("Dados");
 
         Category savedCategory = new Category();
@@ -61,7 +61,7 @@ public class CategoryTest {
 
         when(categoryRepository.save(any(Category.class))).thenReturn(savedCategory);
 
-        CategoryDTO result = categoryService.save(inputDto);
+        CategoryDto result = categoryService.save(inputDto);
 
         assertNotNull(result);
         assertEquals(4L, result.getId());
@@ -72,7 +72,7 @@ public class CategoryTest {
     @Test
     public void updateShouldModifyExistingCategoryAndReturnDTO() {
         Long id = 1L;
-        CategoryDTO inputDto = new CategoryDTO();
+        CategoryDto inputDto = new CategoryDto();
         inputDto.setName("Eurogames Modificado");
 
         Category existingCategory = new Category();
@@ -86,7 +86,7 @@ public class CategoryTest {
         when(categoryRepository.findById(id)).thenReturn(Optional.of(existingCategory));
         when(categoryRepository.save(any(Category.class))).thenReturn(updatedCategory);
 
-        CategoryDTO result = categoryService.update(id, inputDto);
+        CategoryDto result = categoryService.update(id, inputDto);
 
         assertNotNull(result);
         assertEquals(id, result.getId());

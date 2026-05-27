@@ -1,62 +1,63 @@
 package com.ludoteca.category;
 
 import com.ludoteca.category.model.Category;
-import com.ludoteca.category.model.CategoryDTO;
-import com.ludoteca.exception.BadRequestException;
-import com.ludoteca.game.GameRepository;
+import com.ludoteca.category.model.CategoryDto;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * @author ccsw
+ *
+ */
 @Service
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private GameRepository gameRepository;
 
+    @Autowired
+    CategoryRepository categoryRepository;
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<CategoryDTO> findAll() {
+    public List<Category> findAll() {
 
-        return categoryRepository.findAll().stream().map(this::mapToDTO).toList();
+        return (List<Category>) this.categoryRepository.findAll();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public CategoryDTO save(CategoryDTO dto) {
-        if (dto.getName() != null) {
-            categoryRepository.findByNameIgnoreCase(dto.getName().trim()).ifPresent(c -> {
-                throw new BadRequestException("CATEGORY_NAME_EXISTS");
-            });
+    public void save(Long id, CategoryDto dto) {
+
+        Category category;
+
+        if (id == null) {
+            category = new Category();
+        } else {
+            category = this.categoryRepository.findById(id).orElse(null);
         }
 
-        Category category = new Category();
-        category.setName(dto.getName() != null ? dto.getName().trim() : null);
-        return mapToDTO(categoryRepository.save(category));
-    }
-
-    @Override
-    public CategoryDTO update(Long id, CategoryDTO dto) {
-        Category category = categoryRepository.findById(id).orElseThrow();
         category.setName(dto.getName());
-        return mapToDTO(categoryRepository.save(category));
+
+        this.categoryRepository.save(category);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void delete(Long id) {
-        boolean hasGames = gameRepository.existsByCategoryId(id);
+    public void delete(Long id) throws Exception {
 
-        if (hasGames) {
-            throw new BadRequestException("No se puede eliminar la categoría. Tiene juegos asociados.");
+        if (this.categoryRepository.findById(id).orElse(null) == null) {
+            throw new Exception("Not exists");
         }
 
-        categoryRepository.deleteById(id);
+        this.categoryRepository.deleteById(id);
     }
 
-    private CategoryDTO mapToDTO(Category c) {
-        CategoryDTO dto = new CategoryDTO();
-        dto.setId(c.getId());
-        dto.setName(c.getName());
-        return dto;
-    }
 }

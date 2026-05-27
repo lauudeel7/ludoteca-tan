@@ -1,6 +1,6 @@
 package com.ludoteca.ludoteca_api.category;
 
-import com.ludoteca.category.model.CategoryDTO;
+import com.ludoteca.category.model.CategoryDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,10 +28,10 @@ public class CategoryIT {
 
     @Test
     public void findAllShouldReturnInitialCategoriesFromDatabase() {
-        ParameterizedTypeReference<List<CategoryDTO>> responseType = new ParameterizedTypeReference<>() {
+        ParameterizedTypeReference<List<CategoryDto>> responseType = new ParameterizedTypeReference<>() {
         };
 
-        ResponseEntity<List<CategoryDTO>> response = restTemplate.exchange(BASE_URL, HttpMethod.GET, HttpEntity.EMPTY, responseType);
+        ResponseEntity<List<CategoryDto>> response = restTemplate.exchange(BASE_URL, HttpMethod.GET, HttpEntity.EMPTY, responseType);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -43,10 +43,10 @@ public class CategoryIT {
 
     @Test
     public void createShouldInsertNewCategoryInDatabase() {
-        CategoryDTO dto = new CategoryDTO();
+        CategoryDto dto = new CategoryDto();
         dto.setName("Party Games");
 
-        ResponseEntity<CategoryDTO> response = restTemplate.postForEntity(BASE_URL, dto, CategoryDTO.class);
+        ResponseEntity<CategoryDto> response = restTemplate.postForEntity(BASE_URL, dto, CategoryDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -57,11 +57,11 @@ public class CategoryIT {
     @Test
     public void updateShouldModifyExistingCategoryInDatabase() {
         Long idExistente = 1L;
-        CategoryDTO dto = new CategoryDTO();
+        CategoryDto dto = new CategoryDto();
         dto.setName("Eurogames Hardcore");
 
-        HttpEntity<CategoryDTO> requestEntity = new HttpEntity<>(dto);
-        ResponseEntity<CategoryDTO> response = restTemplate.exchange(BASE_URL + "/" + idExistente, HttpMethod.PUT, requestEntity, CategoryDTO.class);
+        HttpEntity<CategoryDto> requestEntity = new HttpEntity<>(dto);
+        ResponseEntity<CategoryDto> response = restTemplate.exchange(BASE_URL + "/" + idExistente, HttpMethod.PUT, requestEntity, CategoryDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());

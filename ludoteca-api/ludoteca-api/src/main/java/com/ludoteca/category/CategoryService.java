@@ -1,16 +1,36 @@
 package com.ludoteca.category;
 
-import com.ludoteca.category.model.CategoryDTO;
+import com.ludoteca.category.model.Category;
+import com.ludoteca.category.model.CategoryDto;
 
 import java.util.List;
 
+/**
+ * @author ccsw
+ *
+ */
 public interface CategoryService {
 
-    List<CategoryDTO> findAll();
+    /**
+     * Método para recuperar todas las {@link Category}
+     *
+     * @return {@link List} de {@link Category}
+     */
+    List<Category> findAll();
 
-    CategoryDTO save(CategoryDTO category);
+    /**
+     * Método para crear o actualizar una {@link Category}
+     *
+     * @param id PK de la entidad
+     * @param dto datos de la entidad
+     */
+    void save(Long id, CategoryDto dto);
 
-    CategoryDTO update(Long id, CategoryDTO dto);
+    /**
+     * Método para borrar una {@link Category}
+     *
+     * @param id PK de la entidad
+     */
+    void delete(Long id) throws Exception;
 
-    void delete(Long id);
 }
