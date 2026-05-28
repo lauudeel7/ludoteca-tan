@@ -1,5 +1,5 @@
-export class Author {
-    id!: number;
-    name!: string;
-    nationality!: string;
+export interface Author {
+    id: number;
+    name: string;
+    nationality: string;
 }

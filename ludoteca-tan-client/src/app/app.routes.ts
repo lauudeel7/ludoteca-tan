@@ -16,7 +16,9 @@ export const routes: Routes = [
   {
     path: 'authors',
     loadComponent: () =>
-      import('./author/author-list/author-list.page').then(m => m.AuthorListPage)
+      import('./author/author-list/author-list.page').then(m => m.AuthorListPage
+
+      )
   },
 
   {

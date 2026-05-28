@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
+import { validateFields } from '../../core/helpers/validation.helper';
 
 @Component({
   selector: 'app-author-edit',
@@ -20,65 +21,43 @@ export class AuthorEditComponent implements OnInit {
   protected readonly dialogRef = inject(MatDialogRef<AuthorEditComponent>);
   protected readonly data = inject(MAT_DIALOG_DATA);
   private readonly cdr = inject(ChangeDetectorRef);
+  errorMessage = signal<string>('');
 
   protected readonly id = model<number | null>(null);
+  protected readonly name = signal<string | null>(null);
+  protected readonly nationality = signal<string | null>(null);
 
-  name: string = '';
-  nationality: string = '';
-  protected readonly errorMessage = signal<string>('');
+  loadFormData(initialData: Author | null) {
+    this.id.set(initialData?.id ?? null);
+    this.name.set(initialData?.name ?? null);
+    this.nationality.set(initialData?.nationality ?? null);
+  }
 
   ngOnInit(): void {
-    if (this.data?.author) {
-      const author = this.data.author;
-      this.id.set(author.id ?? null);
-      this.name = author.name ?? '';
-      this.nationality = author.nationality ?? '';
-    }
+    this.loadFormData(this.data.author ?? null);
   }
 
   onSave() {
-    if (!this.name || !this.name.trim() || !this.nationality || !this.nationality.trim()) {
-      this.errorMessage.set('Error: El nombre y la nacionalidad son campos obligatorios.');
-      return;
+        const id = this.id();
+        const name = this.name();
+        const nationality = this.nationality();
+
+        const requiredFields = ["name", "nationality"] as const
+        const data = { name, nationality }
+
+        if (!validateFields(data, requiredFields)) {
+            return;
+        }
+
+        const author = {
+            id,
+            name,
+            nationality,
+        } as Author;
+        this.authorService.saveAuthor(author).subscribe(() => {
+            this.dialogRef.close(true);
+        });
     }
-
-    this.authorService.saveAuthor({
-      id: this.id() ?? null as any,
-      name: this.name,
-      nationality: this.nationality
-    }).subscribe({
-      next: () => this.dialogRef.close(true),
-      error: (err) => {
-        console.error('Estatus recibido:', err.status);
-
-        let msg = '';
-        if (err.error) {
-          if (typeof err.error === 'string') msg = err.error;
-          else if (typeof err.error === 'object' && err.error.message) {
-            msg = Array.isArray(err.error.message) ? err.error.message.join(' ') : String(err.error.message);
-          }
-        }
-
-        const upperMsg = msg.toUpperCase();
-
-        if (
-          err.status === 400 ||
-          err.status === 409 ||
-          err.status === 500 || 
-          upperMsg.includes('EXISTS') ||
-          upperMsg.includes('DUPLICAT') ||
-          upperMsg.includes('CONSTRAINT')
-        ) {
-          this.errorMessage.set('Error: Ya existe un autor registrado con ese nombre.');
-        } else {
-          this.errorMessage.set('Error inesperado al guardar.');
-        }
-
-        this.cdr.detectChanges();
-      }
-    });
-
-  }
 
   onClose() {
     this.dialogRef.close(false);
