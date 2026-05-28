@@ -1,55 +1,36 @@
-import { Injectable } from "@angular/core";
-import { HttpClient, HttpParams } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Injectable, inject} from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable, of } from "rxjs";
 import { Game } from './models/game.model';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameService {
-    urlEndPoint = 'http://localhost:8080/game';
+    protected readonly http = inject(HttpClient);
 
-    constructor(private httpClient: HttpClient) { }
+    private baseUrl = 'http://localhost:8080/game';
 
-        getGames(
-        title?: string,
-        categoryId?: number
-    ): Observable<Game[]> {
+    getGames(title?: string, categoryId?: number): Observable<Game[]> {
+        return this.http.get<Game[]>(this.composeFindUrl(title, categoryId));
+    }
 
-        let params = new HttpParams();
+    saveGame(game: Game): Observable<void> {
+        const { id } = game;
+        const url = id ? `${this.baseUrl}/${id}` : this.baseUrl;
 
+        return this.http.put<void>(url, game);
+    }
+
+    private composeFindUrl(title?: string, categoryId?: number): string {
+        const params = new URLSearchParams();
         if (title) {
-            params = params.set('title', title);
+          params.set('title', title);
+        }  
+        if (categoryId) {
+            params.set('idCategory', categoryId.toString());
         }
-
-        if (categoryId !== undefined) {
-            params = params.set('idCategory', categoryId);
-        }
-
-        return this.httpClient.get<Game[]>(this.urlEndPoint, { params });
-    }
-
-
-    getGame(idGame: number): Observable<Game> {
-      return this.httpClient.get<Game>(this.urlEndPoint+'/'+idGame);
-    }
-
-    saveGame(game: Game): Observable<Game> {
-        
-        if(game.id){
-            return this.httpClient.put<Game>(
-                `${this.urlEndPoint}/${game.id}`,
-                game
-            );
-        }else{
-            return this.httpClient.post<Game>(
-                this.urlEndPoint,
-                game
-            );
-        }
-    }
-
-    updateGame(id: number, game: Game): Observable<Game>{
-        return this.httpClient.put<Game>(`${this.urlEndPoint}/${id}`, game);
+        const queryString = params.toString();
+        return queryString ? `${this.baseUrl}?${queryString}` : this.baseUrl;
     }
 }

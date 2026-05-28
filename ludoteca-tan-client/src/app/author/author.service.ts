@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Pageable } from '../core/model/page/Pageable';
 import { Author } from './models/author.model';
 import { PaginatedData } from '../core/model/page/PaginatedData';
@@ -27,4 +26,8 @@ export class AuthorService {
     deleteAuthor(idAuthor: number): Observable<void> {
         return this.http.delete<void>(`${this.baseUrl}/${idAuthor}`);
     }
+
+    getAllAuthors(): Observable<Author[]> {
+    return this.http.get<Author[]>(this.baseUrl);
+  }
 }

@@ -1,4 +1,5 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input } from '@angular/core';
+import { Game } from '../../models/game.model';
 import { MatCardModule } from '@angular/material/card';
 
 @Component({
@@ -9,11 +10,5 @@ import { MatCardModule } from '@angular/material/card';
   styleUrls: ['./game-item.scss']
 })
 export class GameItemComponent {
-  game = input.required<any>();
-  
-  cardClick = output<void>();
-
-  onCardClick() {
-    this.cardClick.emit();
-  }
+    public readonly game = input.required<Game>();
 }
