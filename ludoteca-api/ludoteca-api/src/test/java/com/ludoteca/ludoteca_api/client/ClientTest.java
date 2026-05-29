@@ -3,7 +3,7 @@ package com.ludoteca.ludoteca_api.client;
 import com.ludoteca.client.ClientRepository;
 import com.ludoteca.client.ClientService;
 import com.ludoteca.client.model.Client;
-import com.ludoteca.client.model.ClientDTO;
+import com.ludoteca.client.model.ClientDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +36,7 @@ public class ClientTest {
 
         when(clientRepository.findAll()).thenReturn(list);
 
-        List<ClientDTO> result = clientService.getAllClients();
+        List<ClientDto> result = clientService.getAllClients();
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -47,7 +47,7 @@ public class ClientTest {
 
     @Test
     public void saveNewClientWithUniqueNameShouldCreateClient() {
-        ClientDTO inputDto = new ClientDTO();
+        ClientDto inputDto = new ClientDto();
         inputDto.setName("Pedro Picapiedra");
 
         Client savedClient = new Client();
@@ -57,7 +57,7 @@ public class ClientTest {
         when(clientRepository.findByNameIgnoreCase("Pedro Picapiedra")).thenReturn(Optional.empty());
         when(clientRepository.save(any(Client.class))).thenReturn(savedClient);
 
-        ClientDTO result = clientService.saveClient(inputDto);
+        ClientDto result = clientService.saveClient(inputDto);
 
         assertNotNull(result);
         assertEquals(4L, result.getId());
@@ -68,7 +68,7 @@ public class ClientTest {
 
     @Test
     public void saveClientWithExistingNameShouldThrowIllegalArgumentException() {
-        ClientDTO inputDto = new ClientDTO();
+        ClientDto inputDto = new ClientDto();
         inputDto.setName("Ana Martínez");
 
         Client existingClient = new Client();

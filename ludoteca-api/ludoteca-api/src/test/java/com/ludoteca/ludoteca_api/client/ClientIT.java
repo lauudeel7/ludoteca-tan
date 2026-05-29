@@ -1,6 +1,6 @@
 package com.ludoteca.ludoteca_api.client;
 
-import com.ludoteca.client.model.ClientDTO;
+import com.ludoteca.client.model.ClientDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,10 +28,10 @@ public class ClientIT {
 
     @Test
     public void getAllShouldReturnInitialClientsFromDatabase() {
-        ParameterizedTypeReference<List<ClientDTO>> responseType = new ParameterizedTypeReference<>() {
+        ParameterizedTypeReference<List<ClientDto>> responseType = new ParameterizedTypeReference<>() {
         };
 
-        ResponseEntity<List<ClientDTO>> response = restTemplate.exchange(BASE_URL, HttpMethod.GET, HttpEntity.EMPTY, responseType);
+        ResponseEntity<List<ClientDto>> response = restTemplate.exchange(BASE_URL, HttpMethod.GET, HttpEntity.EMPTY, responseType);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -43,10 +43,10 @@ public class ClientIT {
 
     @Test
     public void saveShouldCreateNewClientInDatabaseIfNameIsUnique() {
-        ClientDTO dto = new ClientDTO();
+        ClientDto dto = new ClientDto();
         dto.setName("Roberto Sánchez");
 
-        ResponseEntity<ClientDTO> response = restTemplate.postForEntity(BASE_URL, dto, ClientDTO.class);
+        ResponseEntity<ClientDto> response = restTemplate.postForEntity(BASE_URL, dto, ClientDto.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -56,7 +56,7 @@ public class ClientIT {
 
     @Test
     public void saveShouldReturnBadRequestIfNameAlreadyExists() {
-        ClientDTO dto = new ClientDTO();
+        ClientDto dto = new ClientDto();
         dto.setName("Ana Martínez");
 
         ResponseEntity<String> response = restTemplate.postForEntity(BASE_URL, dto, String.class);

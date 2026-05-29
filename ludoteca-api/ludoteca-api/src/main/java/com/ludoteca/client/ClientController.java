@@ -1,36 +1,43 @@
 package com.ludoteca.client;
 
-import com.ludoteca.client.model.ClientDTO;
+import com.ludoteca.client.model.Client;
+import com.ludoteca.client.model.ClientDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-@CrossOrigin(origins = "*")
+@Tag(name = "Client", description = "API of Client")
+@RequestMapping("/client")
 @RestController
-@RequestMapping("/clients")
+@CrossOrigin(origins = "*")
 public class ClientController {
     @Autowired
-    private ClientService clientService;
+    ClientService clientService;
 
-    @GetMapping
-    public List<ClientDTO> getAll() {
-        return clientService.getAllClients();
+    @Autowired
+    ModelMapper mapper;
+
+    @Operation(summary = "Find", description = "Method that return a list of Clients")
+    @RequestMapping(path = "", method = RequestMethod.GET)
+    public List<ClientDto> findAll() {
+        List<Client> clients = this.clientService.findAll();
+        return clients.stream().map(e -> mapper.map(e, ClientDto.class)).collect(Collectors.toList());
     }
 
-    @PostMapping
-    public ResponseEntity<?> save(@RequestBody ClientDTO clientDto) {
-        try {
-            return ResponseEntity.ok(clientService.saveClient(clientDto));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @Operation(summary = "Save or Update", description = "Method that saves or updates a Client")
+    @RequestMapping(path = { "", "/{id}" }, method = RequestMethod.PUT)
+    public void save(@PathVariable(name = "id", required = false) Long id, @RequestBody ClientDto dto) {
+        this.clientService.save(id, dto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        clientService.deleteClient(id);
-        return ResponseEntity.ok().build();
+    @Operation(summary = "Delete", description = "Method that deletes a Client")
+    @RequestMapping(path = "/{id}", method = RequestMethod.DELETE)
+    public void delete(@PathVariable("id") Long id) throws Exception {
+        this.clientService.delete(id);
     }
 }

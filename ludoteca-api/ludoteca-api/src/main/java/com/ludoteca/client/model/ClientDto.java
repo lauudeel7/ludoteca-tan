@@ -1,13 +1,13 @@
 package com.ludoteca.client.model;
 
-public class ClientDTO {
+public class ClientDto {
     private Long id;
     private String name;
 
-    public ClientDTO() {
+    public ClientDto() {
     }
 
-    public ClientDTO(Long id, String name) {
+    public ClientDto(Long id, String name) {
         this.id = id;
         this.name = name;
     }
