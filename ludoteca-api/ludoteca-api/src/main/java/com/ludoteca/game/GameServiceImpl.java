@@ -38,7 +38,7 @@ public class GameServiceImpl implements GameService {
 
         GameSpecification titleSpec = new GameSpecification(new SearchCriteria("title", ":", title));
         GameSpecification categorySpec = new GameSpecification(new SearchCriteria("category.id", ":", idCategory));
-        
+
         Specification<Game> spec = titleSpec.and(categorySpec);
 
         return this.gameRepository.findAll(spec);
@@ -64,6 +64,15 @@ public class GameServiceImpl implements GameService {
         game.setCategory(categoryService.get(dto.getCategory().getId()));
 
         this.gameRepository.save(game);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+
+    @Override
+    public Game get(Long id) {
+        return this.gameRepository.findById(id).orElse(null);
     }
 
 }

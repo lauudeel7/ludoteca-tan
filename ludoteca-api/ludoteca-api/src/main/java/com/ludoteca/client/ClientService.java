@@ -12,4 +12,6 @@ public interface ClientService {
     void save(Long id, ClientDto dto);
 
     void delete(Long id) throws Exception;
+
+    Client get(Long id);
 }

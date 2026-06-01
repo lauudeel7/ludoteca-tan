@@ -24,4 +24,11 @@ public interface GameService {
      */
     void save(Long id, GameDto dto);
 
+    /**
+     * Recupera un juego por su id
+     *
+     * @param id PK de la entidad
+     * @return {@link Game} encontrado o null
+     */
+    Game get(Long id);
 }
