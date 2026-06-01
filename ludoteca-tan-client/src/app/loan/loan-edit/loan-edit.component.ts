@@ -9,101 +9,91 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 
 import { LoanService } from '../loan.service';
+import { Game } from '../../game/models/game.model';
+import { Client } from '../../client/models/client.model';
 import { GameService } from '../../game/game.service';
 import { ClientService } from '../../client/client.service';
 import { Loan } from '../models/loan.model';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-loan-edit',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, MatFormFieldModule, MatSelectModule,
-    MatInputModule, MatDatepickerModule, MatButtonModule
+    CommonModule,
+    FormsModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule 
   ],
-  providers: [DatePipe],
   templateUrl: './loan-edit.component.html',
-  styleUrl: './loan-edit.component.scss'
+  styleUrls: ['./loan-edit.component.scss']
 })
 export class LoanEditComponent implements OnInit {
-  private readonly loanService = inject(LoanService);
-  private readonly gameService = inject(GameService);
-  private readonly clientService = inject(ClientService);
-  private readonly datePipe = inject(DatePipe);
+    protected readonly id = signal<number | null>(null);
+    protected readonly gameId = signal<number | null>(null);
+    protected readonly clientId = signal<number | null>(null);
+    protected readonly startDate = signal<Date | null>(null);
+    protected readonly endDate = signal<Date | null>(null);
+    
+    protected readonly games = signal<Game[]>([]);
+    protected readonly clients = signal<Client[]>([]);
 
-  protected readonly dialogRef = inject(MatDialogRef<LoanEditComponent>);
-  protected readonly data = inject(MAT_DIALOG_DATA);
+    protected readonly dialogRef = inject(MatDialogRef<LoanEditComponent>);
+    protected readonly data = inject(MAT_DIALOG_DATA);
+    protected readonly loanService = inject(LoanService);
+    protected readonly gameService = inject(GameService);
+    protected readonly clientService = inject(ClientService);
 
-  protected readonly id = model<number | null>(null);
-  selectedClient: any = null;
-  selectedGame: any = null;
-  startDate: Date | null = null;
-  endDate: Date | null = null;
-
-  games: any[] = [];
-  clients: any[] = [];
-  errorMessage = signal<string>('');
-
-  ngOnInit(): void {
-    this.gameService.getGames().subscribe(res => this.games = res ?? []);
-    this.clientService.getClients().subscribe(res => this.clients = res ?? []);
-
-    if (this.data?.loan) {
-      const loan = this.data.loan;
-      this.id.set(loan.id);
-      this.selectedClient = loan.client;
-      this.selectedGame = loan.game;
-      this.startDate = new Date(loan.startDate);
-      this.endDate = new Date(loan.endDate);
-    }
-  }
-
-  onSave() {
-    if (!this.startDate || !this.endDate || !this.selectedGame || !this.selectedClient) return;
-
-    if (this.endDate < this.startDate) {
-      this.errorMessage.set('La fecha de fin no puede ser anterior a la de inicio');
-      return;
+    protected isValid() {
+        return this.gameId() !== null && this.clientId() !== null && this.startDate() !== null && this.endDate() !== null;
     }
 
-    const diffTime = Math.abs(this.endDate.getTime() - this.startDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays > 14) {
-      this.errorMessage.set('El periodo máximo de préstamo no puede superar los 14 días');
-      return;
+    ngOnInit(): void {
+        this.loadFormData(this.data.loan ?? null);
     }
 
-    const payload: any = {
-      id: this.id() || undefined,
-      game: { id: this.selectedGame.id },
-      client: { id: this.selectedClient.id },
-      loanDate: this.datePipe.transform(this.startDate, 'yyyy-MM-dd')!,
-      returnDate: this.datePipe.transform(this.endDate, 'yyyy-MM-dd')!
-    };
+    loadFormData(initialData: Loan | null): void {
+        this.id.set(initialData?.id ?? null);
 
-    this.loanService.saveLoan(payload).subscribe({
-      next: () => this.dialogRef.close(true),
-      error: (err) => {
-        if (err.status === 400) {
-          const gameId = this.selectedGame?.id || this.data?.loan?.gameId;
-          const clientId = this.selectedClient?.id || this.data?.loan?.clientId;
+        this.gameService.getGames().subscribe((gamesList) => {
+            this.games.set(gamesList);
+            this.gameId.set(initialData?.game?.id ?? null);
+        });
 
-          const gameName = this.games.find(g => g.id == gameId)?.title || 'seleccionado';
-          const clientName = this.clients.find(c => c.id == clientId)?.name || 'seleccionado';
+        this.clientService.getClients().subscribe((clientsList) => {
+            this.clients.set(clientsList ?? []);
+            this.clientId.set(initialData?.client?.id ?? null);
+        });
 
-          this.errorMessage.set(
-            `No se puede guardar: Comprueba si el juego "${gameName}" ya está prestado en estas fechas, o si el cliente "${clientName}" ya ha alcanzado el límite máximo de 2 préstamos activos.`
-          );
-        } else {
-          this.errorMessage.set('Error de conexión o servidor no disponible.');
-        }
-      }
-    });
+        this.startDate.set(initialData?.startDate ? new Date(initialData.startDate) : null);
+        this.endDate.set(initialData?.endDate ? new Date(initialData.endDate) : null);
+    }
 
-  }
+    onSave() {
+        const id = this.id();
+        const gameId = this.gameId(); 
+        const clientId = this.clientId(); 
+        const startDate = this.startDate(); 
+        const endDate = this.endDate(); 
 
-  compareObjects(o1: any, o2: any): boolean {
-    return o1 && o2 ? Number(o1.id) === Number(o2.id) : o1 === o2;
-  }
+        const loan = {
+            id,
+            game: this.games().find(g => g.id === gameId) ?? null,
+            client: this.clients().find(c => c.id === clientId) ?? null,
+            startDate: startDate ? startDate.toISOString().split('T')[0] : null,
+            endDate: endDate ? endDate.toISOString().split('T')[0] : null
+        } as unknown as Loan;
 
-  onClose() { this.dialogRef.close(false); }
+        this.loanService.saveLoan(loan).subscribe(() => {
+            this.dialogRef.close(true);
+        });
+    }
+
+    onClose() {
+        this.dialogRef.close();
+    }
 }

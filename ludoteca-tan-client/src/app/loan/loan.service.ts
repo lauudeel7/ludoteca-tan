@@ -9,40 +9,39 @@ import { Loan } from './models/loan.model';
   providedIn: 'root'
 })
 export class LoanService {
-  private readonly http = inject(HttpClient);
-  private readonly urlEndPoint = 'http://localhost:8080/loan';
+  protected readonly http = inject(HttpClient);
+  private baseUrl = 'http://localhost:8080/loan';
 
-  getLoans(pageable: Pageable, gameId?: number, clientId?: number, date?: string): Observable<PaginatedData<Loan>> {
+  getLoans(pageable: Pageable, idGame?: number, idClient?: number, date?: string): Observable<PaginatedData<Loan>> {
     const searchDto = {
-      gameId: gameId || null,
-      clientId: clientId || null,
-      date: date || null,
-      pageable: {
-        pageNumber: pageable.pageNumber,
-        pageSize: pageable.pageSize,
-        sort: {
-          empty: true,
-          sorted: false,
-          unsorted: true
-        },
-        offset: pageable.pageNumber * pageable.pageSize,
-        paged: true,
-        unpaged: false
-      }
+      idGame: idGame || null,
+      idClient: idClient || null,
+      date: date || null
     };
 
-    return this.http.post<PaginatedData<Loan>>(this.urlEndPoint, searchDto);
+    return this.http.post<PaginatedData<Loan>>(this.composeFindUrl(pageable), searchDto);
   }
 
   saveLoan(loan: Loan): Observable<void> {
-    let url = this.urlEndPoint;
-    if (loan.id != null) {
-      url += '/' + loan.id;
-    }
+    const { id } = loan;
+    const url = id ? `${this.baseUrl}/${id}` : this.baseUrl;
+
     return this.http.put<void>(url, loan);
   }
 
   deleteLoan(idLoan: number): Observable<void> {
-    return this.http.delete<void>(`${this.urlEndPoint}/${idLoan}`);
+    return this.http.delete<void>(`${this.baseUrl}/${idLoan}`);
+  }
+
+   private composeFindUrl(pageable: Pageable): string {
+    const params = new URLSearchParams();
+    
+    if (pageable) {
+      params.set('page', pageable.pageNumber.toString());
+      params.set('size', pageable.pageSize.toString());
+    }
+    
+    const queryString = params.toString();
+    return queryString ? `${this.baseUrl}?${queryString}` : this.baseUrl;
   }
 }

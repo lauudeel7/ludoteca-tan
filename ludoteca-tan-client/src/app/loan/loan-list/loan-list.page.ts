@@ -1,9 +1,9 @@
-import { Component, OnInit, inject, ChangeDetectorRef  } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, inject, signal  } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -16,111 +16,123 @@ import { LoanService } from '../loan.service';
 import { GameService } from '../../game/game.service';
 import { ClientService } from '../../client/client.service';
 import { LoanEditComponent } from '../loan-edit/loan-edit.component';
-import { DialogConfirmationComponent } from '../../core/dialog-confirmation/dialog-confirmation.component';
 import { Pageable } from '../../core/model/page/Pageable';
 import { Loan } from '../models/loan.model';
+import { Game } from '../../game/models/game.model';
+import { Client } from '../../client/models/client.model';
 
 @Component({
   selector: 'app-loan-list',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, MatTableModule, MatPaginatorModule, MatDialogModule,
-    MatFormFieldModule, MatSelectModule, MatInputModule, MatDatepickerModule,
-    MatNativeDateModule, MatButtonModule, MatIconModule
+    MatButtonModule,
+    MatIconModule,
+    MatTableModule,
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatPaginatorModule,
+    LoanEditComponent
   ],
-  providers: [DatePipe],
   templateUrl: './loan-list.page.html',
-  styleUrl: './loan-list.page.scss'
+  styleUrls: ['./loan-list.page.scss']
 })
 export class LoanListPage implements OnInit {
-  private readonly loanService = inject(LoanService);
-  private readonly gameService = inject(GameService);
-  private readonly clientService = inject(ClientService);
-  private readonly dialog = inject(MatDialog);
-  private readonly datePipe = inject(DatePipe);
-  private readonly cdr = inject(ChangeDetectorRef);
 
-  pageNumber: number = 0;
-  pageSize: number = 5;
-  totalElements: number = 0;
+    protected readonly loans = signal<Loan[]>([]);
+    protected readonly games = signal<Game[]>([]);
+    protected readonly clients = signal<Client[]>([]);
+    
+    protected readonly filterGame = signal<Game | null>(null);
+    protected readonly filterClient = signal<Client | null>(null);
+    protected readonly filterDate = signal<Date | null>(null);
 
-  filterGameId: number | null = null;
-  filterClientId: number | null = null;
-  filterDate: Date | null = null;
+    protected readonly displayedColumns: string[] = ['id', 'game', 'client', 'startDate', 'endDate', 'action'];
+    
+    protected pageNumber = 0;
+    protected pageSize = 5;
+    protected totalElements = 0;
 
-  games: any[] = [];
-  clients: any[] = [];
-  dataSource = new MatTableDataSource<Loan>();
-  displayedColumns: string[] = ['id', 'game', 'client', 'startDate', 'endDate', 'action'];
+    protected readonly loanService = inject(LoanService);
+    protected readonly gameService = inject(GameService);
+    protected readonly clientService = inject(ClientService);
+    protected readonly dialog = inject(MatDialog);
 
-  ngOnInit(): void {
-    this.gameService.getGames().subscribe(res => {
-      this.games = res ?? [];
-      this.cdr.detectChanges();
-    });
-    this.clientService.getClients().subscribe(res => {
-      this.clients = res ?? [];
-      this.cdr.detectChanges(); 
-    });
-    this.loadPage();
-  }
-
-  loadPage(event?: PageEvent) {
-    if (event != null) {
-      this.pageSize = event.pageSize;
-      this.pageNumber = event.pageIndex;
+    ngOnInit(): void {
+        this.loadPage();
+        this.gameService.getGames().subscribe((games) => this.games.set(games));
+        this.clientService.getClients().subscribe((clients) => this.clients.set(clients));
     }
 
-    const pageable: Pageable = { pageNumber: this.pageNumber, pageSize: this.pageSize, sort: [] };
-    const formattedDate = this.filterDate ? this.datePipe.transform(this.filterDate, 'yyyy-MM-dd')! : undefined;
+    protected loadPage(event?: PageEvent): void {
+        if (event) {
+            this.pageNumber = event.pageIndex;
+            this.pageSize = event.pageSize;
+        }
 
-    this.loanService.getLoans(pageable, this.filterGameId || undefined, this.filterClientId || undefined, formattedDate)
-      .subscribe(data => {
-        this.dataSource.data = data.content ?? [];
-        this.totalElements = data.totalElements;
-        this.cdr.detectChanges(); 
-      });
-  }
+        const pageable: Pageable = {
+            pageNumber: this.pageNumber,
+            pageSize: this.pageSize,
+            sort: []
+        };
 
-  getGameTitle(gameId: any): string {
-    if (!this.games || this.games.length === 0) return 'Cargando juegos...';
-    if (!gameId) return 'Sin ID';
-    
-    console.log('Buscando juego con ID:', gameId, 'dentro de la lista:', this.games);
-    
-    const game = this.games.find(g => g.id == gameId);
-    return game ? game.title : `ID ${gameId} no encontrado`;
-  }
+        const idGame = this.filterGame()?.id ?? undefined;
+        const idClient = this.filterClient()?.id ?? undefined;
+        const dateStr = this.filterDate() ? this.filterDate()!.toISOString().split('T')[0] : undefined;
 
-getClientName(clientId: any): string {
-  if (!this.clients || this.clients.length === 0) return 'Cargando clientes...';
-  if (!clientId) return 'Sin ID';
-  
-  const client = this.clients.find(c => c.id == clientId);
-  return client ? client.name : `ID ${clientId} no encontrado`;
-}
+        this.loanService
+            .getLoans(pageable, idGame, idClient, dateStr)
+            .subscribe((page) => {
+                this.loans.set(page.content);
+                this.totalElements = page.totalElements;
+            });
+    }
 
-  cleanFilters() {
-    this.filterGameId = null;
-    this.filterClientId = null;
-    this.filterDate = null;
-    this.loadPage();
-  }
+    protected onSearch(): void {
+        this.pageNumber = 0;
+        this.loadPage();
+    }
 
-  createLoan() {
-    this.dialog.open(LoanEditComponent, { data: {} }).afterClosed().subscribe(res => res && this.loadPage());
-  }
+    protected onCleanFilter(): void {
+        this.filterGame.set(null);
+        this.filterClient.set(null);
+        this.filterDate.set(null);
+        this.onSearch();
+    }
 
-  editLoan(loan: Loan) {
-    this.dialog.open(LoanEditComponent, { data: { loan } }).afterClosed().subscribe(res => res && this.loadPage());
-  }
+    protected cleanFilters(): void {
+        this.onCleanFilter();
+    }
 
-  deleteLoan(loan: Loan) {
-    if (loan.id === undefined) return;
-    this.dialog.open(DialogConfirmationComponent, {
-      data: { title: 'Eliminar préstamo', description: '¿Desea revocar el préstamo del juego?' }
-    }).afterClosed().subscribe(res => {
-      if (res) this.loanService.deleteLoan(loan.id!).subscribe(() => this.loadPage());
-    });
-  }
+    protected createLoan(): void {
+        const dialogRef = this.dialog.open(LoanEditComponent, {
+            data: {},
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (!result) return;
+            this.onSearch();
+        });
+    }
+
+    protected editLoan(loan: Loan): void {
+        const dialogRef = this.dialog.open(LoanEditComponent, {
+            data: { loan: loan },
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (!result) return;
+            this.loadPage();
+        });
+    }
+
+    protected deleteLoan(loan: Loan): void {
+        this.loanService.deleteLoan(loan.id).subscribe(() => {
+            this.loadPage();
+        });
+    }
 }
