@@ -1,4 +1,4 @@
-export class Client {
-    id: number | undefined;
-    name: string | undefined;
+export interface Client {
+    id: number;
+    name: string;
 }

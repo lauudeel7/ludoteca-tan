@@ -64,6 +64,7 @@ export class ClientListPage implements OnInit {
   if (client.id === undefined) return;
 
   this.clientService.checkClientLoans(client.id).subscribe((hasLoans) => {
+    // Si tiene préstamos, muestra error y detenemos la ejecución aquí
     if (hasLoans) {
       this.dialog.open(DialogConfirmationComponent, {
         data: { 
@@ -71,23 +72,24 @@ export class ClientListPage implements OnInit {
           description: 'No se puede eliminar al cliente porque tiene préstamos asociados activos.<br> Revoca primero sus préstamos.' 
         }
       });
-      return;
+    } else {
+      // SI NO tiene préstamos, procedemos con la confirmación de borrado
+      const dialogRef = this.dialog.open(DialogConfirmationComponent, {
+        data: { 
+          title: 'Eliminar cliente', 
+          description: 'Atención si borra el cliente se perderán sus datos.<br> ¿Desea eliminar el cliente?' 
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.clientService.deleteClient(client.id!).subscribe(() => {
+            this.loadData();
+          });
+        }
+      });
     }
-
-    const dialogRef = this.dialog.open(DialogConfirmationComponent, {
-      data: { 
-        title: 'Eliminar cliente', 
-        description: 'Atención si borra el cliente se perderán sus datos.<br> ¿Desea eliminar el cliente?' 
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.clientService.deleteClient(client.id!).subscribe(() => {
-          this.loadData();
-        });
-      }
-    });
   });
 }
+
 }
