@@ -30,21 +30,22 @@ public class ClientServiceImpl implements ClientService {
         Client client;
 
         if (id == null) {
-
             if (this.clientRepository.existsByName(dto.getName())) {
                 throw new BadRequestException("Ya existe un cliente registrado con el nombre: " + dto.getName());
             }
             client = new Client();
         } else {
             client = this.clientRepository.findById(id).orElse(null);
-        }
+            if (client == null) {
+                throw new BadRequestException("El cliente seleccionado no existe.");
+            }
 
-        if (!client.getName().equalsIgnoreCase(dto.getName()) && this.clientRepository.existsByName(dto.getName())) {
-            throw new BadRequestException("No puedes usar ese nombre porque ya pertenece a otro cliente.");
+            if (!client.getName().equalsIgnoreCase(dto.getName()) && this.clientRepository.existsByName(dto.getName())) {
+                throw new BadRequestException("No puedes usar ese nombre porque ya pertenece a otro cliente.");
+            }
         }
 
         client.setName(dto.getName());
-
         this.clientRepository.save(client);
     }
 
