@@ -67,13 +67,25 @@ export class CategoryListPage implements OnInit {
       data: { title: 'Eliminar categoría', description: 'Atención si borra la categoría se perderán sus datos.<br> ¿Desea eliminar la categoría?' }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.categoryService.deleteCategory(category.id).subscribe(() => {
-          this.loadData();
+    dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.categoryService.deleteCategory(category.id).subscribe({
+                    next: () => {
+                        this.ngOnInit();
+                    },
+                    error: (err) => {
+                        const message = err.error?.message || 'No se pudo eliminar la categoría seleccionada.';
+
+                        this.dialog.open(DialogErrorComponent, {
+                            data: {
+                                title: 'Error al eliminar',
+                                description: message
+                            }
+                        });
+                    }
+                });
+            }
         });
-      }
-    });
-  }
+    }
 }
 

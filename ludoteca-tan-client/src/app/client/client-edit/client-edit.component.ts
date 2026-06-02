@@ -23,7 +23,7 @@ export class ClientEditComponent implements OnInit {
 
     protected readonly id = model<number | null>(null);
     protected readonly name = signal<string | null>(null);
-    protected readonly errorMessage = signal<string>('');
+    protected readonly errorMessage = signal<string | null>(null);
 
     ngOnInit(): void {
         this.loadFormData(this.data.client ?? null);
@@ -43,8 +43,14 @@ export class ClientEditComponent implements OnInit {
         }
 
         const client = { id, name } as Client;
-        this.clientService.saveClient(client).subscribe(() => {
-            this.dialogRef.close(true);
+        this.clientService.saveClient(client).subscribe({
+            next: () => {
+                this.dialogRef.close(true);
+            },
+            error: (err) => {
+                const message = err.error?.message || 'Error al guardar el cliente.';
+                this.errorMessage.set(message);
+            }
         });
     }
 

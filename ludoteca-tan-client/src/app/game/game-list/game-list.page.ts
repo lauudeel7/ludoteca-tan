@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Game } from '../models/game.model';
 import { GameService } from '../game.service';
-import { ChangeDetectorRef } from '@angular/core';
 import { GameEditComponent } from '../game-edit/game-edit.component';
 import { FormsModule } from '@angular/forms';
 import { Category } from '../../category/models/category.model';

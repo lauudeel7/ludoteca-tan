@@ -10,6 +10,7 @@ import { DialogConfirmationComponent } from '../../core/dialog-confirmation/dial
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { DialogErrorComponent } from '../../core/dialog-error/dialog-error-component';
 
 @Component({
     selector: 'app-author-list',
@@ -26,7 +27,7 @@ export class AuthorListPage implements OnInit {
     dataSource = new MatTableDataSource<Author>();
     displayedColumns: string[] = ['id', 'name', 'nationality', 'action'];
 
-    constructor(private authorService: AuthorService, public dialog: MatDialog) {}
+    constructor(private authorService: AuthorService, public dialog: MatDialog) { }
 
     ngOnInit(): void {
         this.loadPage();
@@ -88,8 +89,20 @@ export class AuthorListPage implements OnInit {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                this.authorService.deleteAuthor(author.id).subscribe((result) => {
-                    this.ngOnInit();
+                this.authorService.deleteAuthor(author.id).subscribe({
+                    next: () => {
+                        this.ngOnInit();
+                    },
+                    error: (err) => {
+                        const message = err.error?.message || 'No se pudo eliminar el autor seleccionado.';
+
+                        this.dialog.open(DialogErrorComponent, {
+                            data: {
+                                title: 'Error al eliminar',
+                                description: message
+                            }
+                        });
+                    }
                 });
             }
         });

@@ -4,11 +4,13 @@ import com.ludoteca.author.model.Author;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author ccsw
  *
  */
+@Repository
 public interface AuthorRepository extends CrudRepository<Author, Long> {
 
     /**

@@ -1,12 +1,13 @@
-import { Component, OnInit, inject, model, signal } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
+import { DialogErrorComponent } from '../../core/dialog-error/dialog-error-component';
 
 import { LoanService } from '../loan.service';
 import { Game } from '../../game/models/game.model';
@@ -15,22 +16,28 @@ import { GameService } from '../../game/game.service';
 import { ClientService } from '../../client/client.service';
 import { Loan } from '../models/loan.model';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
-  selector: 'app-loan-edit',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatButtonModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule 
-  ],
-  templateUrl: './loan-edit.component.html',
-  styleUrls: ['./loan-edit.component.scss']
+    selector: 'app-loan-edit',
+    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        MatButtonModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatIconModule
+    ],
+    providers: [
+        provideNativeDateAdapter()
+    ],
+    templateUrl: './loan-edit.component.html',
+    styleUrls: ['./loan-edit.component.scss']
 })
 export class LoanEditComponent implements OnInit {
     protected readonly id = signal<number | null>(null);
@@ -38,7 +45,7 @@ export class LoanEditComponent implements OnInit {
     protected readonly clientId = signal<number | null>(null);
     protected readonly startDate = signal<Date | null>(null);
     protected readonly endDate = signal<Date | null>(null);
-    
+    protected readonly errorMessage = signal<string | null>(null);
     protected readonly games = signal<Game[]>([]);
     protected readonly clients = signal<Client[]>([]);
 
@@ -74,11 +81,13 @@ export class LoanEditComponent implements OnInit {
     }
 
     onSave() {
+        this.errorMessage.set(null);
+
         const id = this.id();
-        const gameId = this.gameId(); 
-        const clientId = this.clientId(); 
-        const startDate = this.startDate(); 
-        const endDate = this.endDate(); 
+        const gameId = this.gameId();
+        const clientId = this.clientId();
+        const startDate = this.startDate();
+        const endDate = this.endDate();
 
         const loan = {
             id,
@@ -88,8 +97,14 @@ export class LoanEditComponent implements OnInit {
             endDate: endDate ? endDate.toISOString().split('T')[0] : null
         } as unknown as Loan;
 
-        this.loanService.saveLoan(loan).subscribe(() => {
-            this.dialogRef.close(true);
+        this.loanService.saveLoan(loan).subscribe({
+            next: () => {
+                this.dialogRef.close(true);
+            }, 
+            error: (err) => {
+                const message = err.error?.message || 'Ocurrió un error inesperado al guardar el préstamo.';
+                this.errorMessage.set(message);
+            }
         });
     }
 

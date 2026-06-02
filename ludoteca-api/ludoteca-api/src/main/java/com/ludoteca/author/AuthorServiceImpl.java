@@ -3,6 +3,8 @@ package com.ludoteca.author;
 import com.ludoteca.author.model.Author;
 import com.ludoteca.author.model.AuthorDto;
 import com.ludoteca.author.model.AuthorSearchDto;
+import com.ludoteca.exception.BadRequestException;
+import com.ludoteca.game.GameRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Autowired
     AuthorRepository authorRepository;
+
+    @Autowired
+    GameRepository gameRepository;
 
     /**
      * {@inheritDoc}
@@ -63,10 +68,14 @@ public class AuthorServiceImpl implements AuthorService {
      * {@inheritDoc}
      */
     @Override
-    public void delete(Long id) throws Exception {
+    public void delete(Long id) throws BadRequestException {
 
-        if (this.authorRepository.findById(id).orElse(null) == null) {
-            throw new Exception("Not exists");
+        if (!this.authorRepository.existsById(id)) {
+            throw new BadRequestException("El autor seleccionado no existe o ya ha sido eliminado.");
+        }
+
+        if (this.gameRepository.existsByAuthorId(id)) {
+            throw new BadRequestException("No se puede eliminar el autor porque tiene juegos asociados en el catálogo.");
         }
 
         this.authorRepository.deleteById(id);
