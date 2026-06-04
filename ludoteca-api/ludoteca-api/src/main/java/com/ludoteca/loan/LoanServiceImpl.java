@@ -52,7 +52,7 @@ public class LoanServiceImpl implements LoanService {
     public void save(Long id, LoanDto dto) throws BadRequestException {
         // 1. Validación: Fecha de fin posterior o igual al inicio
         if (dto.getEndDate().isBefore(dto.getStartDate())) {
-            throw new BadRequestException("La fecha de fin no puede ser anterior a la de inicio."); // 👈 CAMBIADO
+            throw new BadRequestException("La fecha de fin no puede ser anterior a la de inicio.");
         }
 
         // 2. Validación: Período máximo de 14 días
