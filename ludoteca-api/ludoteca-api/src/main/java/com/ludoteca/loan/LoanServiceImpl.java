@@ -58,7 +58,7 @@ public class LoanServiceImpl implements LoanService {
         // 2. Validación: Período máximo de 14 días
         long days = ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate());
         if (days > 14) {
-            throw new BadRequestException("El periodo máximo de préstamo no puede superar los 14 días."); // 👈 CAMBIADO
+            throw new BadRequestException("El periodo máximo de préstamo no puede superar los 14 días.");
         }
 
         // Obtenemos todos los préstamos existentes para validar cruces de fechas
@@ -72,13 +72,13 @@ public class LoanServiceImpl implements LoanService {
             // 3. Validación: Mismo juego prestado a dos clientes distintos el mismo día
             boolean gameAlreadyLoaned = activeLoansToday.stream().anyMatch(l -> l.getGame().getId().equals(dto.getGame().getId()));
             if (gameAlreadyLoaned) {
-                throw new BadRequestException("El juego ya está prestado a otro cliente en los días seleccionados."); // 👈 CAMBIADO
+                throw new BadRequestException("El juego ya está prestado a otro cliente en los días seleccionados.");
             }
 
             // 4. Validación: Un mismo cliente no puede tener más de 2 juegos a la vez en un día
             long clientLoanCount = activeLoansToday.stream().filter(l -> l.getClient().getId().equals(dto.getClient().getId())).count();
             if (clientLoanCount >= 2) {
-                throw new BadRequestException("El cliente ya tiene el cupo máximo de 2 préstamos activos en los días seleccionados."); // 👈 CAMBIADO
+                throw new BadRequestException("El cliente ya tiene el cupo máximo de 2 préstamos activos en los días seleccionados.");
             }
         }
 
